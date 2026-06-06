@@ -40,6 +40,12 @@ export type DeveloperProfile = {
   specialization: string;
   guild: string;
   avatarInitials: string;
+  avatarUrl?: string;
+  bio?: string;
+  location?: string;
+  blog?: string;
+  followers?: number;
+  following?: number;
   powerLevel: number;
   xpProgress: number;
   rank: string;

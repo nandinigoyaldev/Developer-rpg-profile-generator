@@ -40,10 +40,12 @@ export default async function handler(req: any, res: any) {
     }
 
     // Determine target headers
-    const headers: Record<string, string> = {
+    const publicHeaders: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'developer-rpg-profile-generator',
     };
+
+    const headers: Record<string, string> = { ...publicHeaders };
 
     if (accessToken) {
       headers['Authorization'] = `token ${accessToken}`;
@@ -51,13 +53,21 @@ export default async function handler(req: any, res: any) {
       headers['Authorization'] = `token ${GITHUB_TOKEN}`;
     }
 
+    // Determine helper to get request headers to avoid fine-grained scoped token filter bugs
+    const getRequestHeaders = () => {
+      return (!accessToken && GITHUB_TOKEN) ? publicHeaders : headers;
+    };
+
     // 1. Fetch User Profile
     let userProfileUrl = 'https://api.github.com/user';
     if (!accessToken && username) {
       userProfileUrl = `https://api.github.com/users/${encodeURIComponent(username)}`;
     }
 
-    const userRes = await fetch(userProfileUrl, { headers });
+    let userRes = await fetch(userProfileUrl, { headers: getRequestHeaders() });
+    if (!userRes.ok && !accessToken && GITHUB_TOKEN) {
+      userRes = await fetch(userProfileUrl, { headers });
+    }
     if (!userRes.ok) {
       const errText = await userRes.text();
       throw new Error(`GitHub Profile Fetch Failed: Status ${userRes.status}. Details: ${errText}`);
@@ -70,7 +80,10 @@ export default async function handler(req: any, res: any) {
     if (!accessToken) {
       reposUrl = `https://api.github.com/users/${encodeURIComponent(login)}/repos?per_page=50&sort=updated`;
     }
-    const reposRes = await fetch(reposUrl, { headers });
+    let reposRes = await fetch(reposUrl, { headers: getRequestHeaders() });
+    if (!reposRes.ok && !accessToken && GITHUB_TOKEN) {
+      reposRes = await fetch(reposUrl, { headers });
+    }
     let reposData = [];
     if (reposRes.ok) {
       reposData = await reposRes.json();
@@ -80,12 +93,19 @@ export default async function handler(req: any, res: any) {
     let totalCommits = 0;
     try {
       const commitSearchUrl = `https://api.github.com/search/commits?q=author:${encodeURIComponent(login)}`;
-      const commitSearchRes = await fetch(commitSearchUrl, {
-        headers: {
-          ...headers,
-          Accept: 'application/vnd.github.cloak-preview+json',
-        },
-      });
+      const searchHeaders = {
+        ...getRequestHeaders(),
+        Accept: 'application/vnd.github.cloak-preview+json',
+      };
+      let commitSearchRes = await fetch(commitSearchUrl, { headers: searchHeaders });
+      if (!commitSearchRes.ok && !accessToken && GITHUB_TOKEN) {
+        commitSearchRes = await fetch(commitSearchUrl, {
+          headers: {
+            ...headers,
+            Accept: 'application/vnd.github.cloak-preview+json',
+          },
+        });
+      }
       if (commitSearchRes.ok) {
         const commitSearchData = await commitSearchRes.json();
         totalCommits = commitSearchData.total_count || 0;
@@ -101,7 +121,10 @@ export default async function handler(req: any, res: any) {
     let totalPRs = 0;
     try {
       const prSearchUrl = `https://api.github.com/search/issues?q=author:${encodeURIComponent(login)}+type:pr+is:merged`;
-      const prSearchRes = await fetch(prSearchUrl, { headers });
+      let prSearchRes = await fetch(prSearchUrl, { headers: getRequestHeaders() });
+      if (!prSearchRes.ok && !accessToken && GITHUB_TOKEN) {
+        prSearchRes = await fetch(prSearchUrl, { headers });
+      }
       if (prSearchRes.ok) {
         const prSearchData = await prSearchRes.json();
         totalPRs = prSearchData.total_count || 0;
@@ -116,7 +139,10 @@ export default async function handler(req: any, res: any) {
     let streak = 0;
     try {
       const eventsUrl = `https://api.github.com/users/${encodeURIComponent(login)}/events/public?per_page=100`;
-      const eventsRes = await fetch(eventsUrl, { headers });
+      let eventsRes = await fetch(eventsUrl, { headers: getRequestHeaders() });
+      if (!eventsRes.ok && !accessToken && GITHUB_TOKEN) {
+        eventsRes = await fetch(eventsUrl, { headers });
+      }
       if (eventsRes.ok) {
         const events = await eventsRes.json();
         
@@ -272,34 +298,78 @@ export default async function handler(req: any, res: any) {
       { label: 'Contrib Streak', value: `${streak} days`, modifier: streak > 10 ? 'Unstoppable!' : 'Streak active' },
     ];
 
+    // 10.5. Scrape real achievements from user's GitHub profile page
+    let scrapedAchievements: Achievement[] = [];
+    try {
+      const htmlRes = await fetch(`https://github.com/${encodeURIComponent(login)}`);
+      if (htmlRes.ok) {
+        const html = await htmlRes.text();
+        
+        // Match Pro label
+        if (html.includes('title="Label: Pro"') || html.includes('Pro</span>') || html.includes('class="label-pro"') || html.toLowerCase().includes('pro status')) {
+          scrapedAchievements.push({ title: 'Pro status', tier: 'Gold', detail: 'Unlocked Pro status highlight on GitHub' });
+        }
+        
+        // Common GitHub achievements
+        const possibleAchievements = [
+          { name: 'Pair Extraordinaire', tier: 'Silver', detail: 'Co-authored commits in public repositories' },
+          { name: 'Pull Shark', tier: 'Gold', detail: 'Merged multiple pull request raids' },
+          { name: 'YOLO', tier: 'Cyan', detail: 'Merged pull requests directly without review' },
+          { name: 'Quickdraw', tier: 'Silver', detail: 'Merged a pull request within minutes' },
+          { name: 'Arctic Code Vault Contributor', tier: 'Bronze', detail: 'Preserved code in the Arctic Vault archive' },
+          { name: 'Heart on your sleeve', tier: 'Bronze', detail: 'Sponsor of active developers' }
+        ];
+
+        possibleAchievements.forEach(ach => {
+          if (html.includes(ach.name)) {
+            let finalName = ach.name;
+            if (ach.name === 'Pull Shark') {
+              const pullSharkCountMatch = html.match(/Pull Shark\s*x\s*(\d+)/i);
+              if (pullSharkCountMatch) {
+                finalName += ` x${pullSharkCountMatch[1]}`;
+              }
+            }
+            scrapedAchievements.push({
+              title: finalName,
+              tier: ach.tier,
+              detail: ach.detail
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Failed to scrape achievements:', e);
+    }
+
     // 11. Create achievements list
     const achievements: Achievement[] = [
-      { title: 'First Milestone', tier: 'Bronze', detail: 'Created a GitHub account' }
+      { title: 'First Milestone', tier: 'Bronze', detail: 'Created a GitHub account' },
+      ...scrapedAchievements
     ];
 
-    if (totalCommits >= 1000) {
+    if (totalCommits >= 1000 && !scrapedAchievements.some(a => a.title.includes('Commit Overlord'))) {
       achievements.push({ title: 'Commit Overlord', tier: 'Gold', detail: 'Over 1000 repositories commits logged' });
-    } else if (totalCommits >= 100) {
+    } else if (totalCommits >= 100 && !scrapedAchievements.some(a => a.title.includes('Code Crusader'))) {
       achievements.push({ title: 'Code Crusader', tier: 'Silver', detail: 'Cleared 100 commits' });
     }
 
-    if (totalPRs >= 20) {
+    if (totalPRs >= 20 && !scrapedAchievements.some(a => a.title.includes('Guild Champion'))) {
       achievements.push({ title: 'Guild Champion', tier: 'Emerald', detail: '20+ pull requests merged' });
-    } else if (totalPRs >= 1) {
+    } else if (totalPRs >= 1 && !scrapedAchievements.some(a => a.title.includes('First Contribution'))) {
       achievements.push({ title: 'First Contribution', tier: 'Bronze', detail: 'Merged first PR raid' });
     }
 
-    if (totalStars >= 50) {
+    if (totalStars >= 50 && !scrapedAchievements.some(a => a.title.includes('Celebrity Sage'))) {
       achievements.push({ title: 'Celebrity Sage', tier: 'Cyan', detail: 'Fame exceeds 50 stargazers' });
-    } else if (totalStars >= 5) {
+    } else if (totalStars >= 5 && !scrapedAchievements.some(a => a.title.includes('Star Gatherer'))) {
       achievements.push({ title: 'Star Gatherer', tier: 'Silver', detail: 'Earned 5+ repository stars' });
     }
 
-    if (userData.followers >= 50) {
+    if (userData.followers >= 50 && !scrapedAchievements.some(a => a.title.includes('Guild Leader'))) {
       achievements.push({ title: 'Guild Leader', tier: 'Gold', detail: 'Commanding a following of 50+' });
     }
 
-    if (streak >= 14) {
+    if (streak >= 14 && !scrapedAchievements.some(a => a.title.includes('Flame Keeper'))) {
       achievements.push({ title: 'Flame Keeper', tier: 'Cyan', detail: 'Maintained a 14+ day contribution streak' });
     }
 
@@ -346,13 +416,27 @@ export default async function handler(req: any, res: any) {
     if (totalPRs < 10) missingSkills.push('CI/CD Workflows');
     if (missingSkills.length === 0) missingSkills.push('Database Tuning', 'System Scalability');
 
+    const getInitials = (nameStr: string) => {
+      const parts = nameStr.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return nameStr.slice(0, 2).toUpperCase();
+    };
+
     const profile: DeveloperProfile = {
       name: userData.name || login,
       title: `Developer Tier: ${rank}`,
       className,
       specialization,
       guild: userData.company || 'Independent Mercenary',
-      avatarInitials: (userData.name || login).slice(0, 2).toUpperCase(),
+      avatarInitials: getInitials(userData.name || login),
+      avatarUrl: userData.avatar_url,
+      bio: userData.bio,
+      location: userData.location,
+      blog: userData.blog,
+      followers: userData.followers,
+      following: userData.following,
       powerLevel,
       xpProgress: Math.min(99, Math.floor(((powerLevel % 25) / 25) * 100)),
       rank,

@@ -13,12 +13,21 @@ import { characterProfile } from './data/character';
 import { originThemes } from './data/origins';
 import type { DeveloperProfile } from './types/profile';
 
+type ChecklistItem = {
+  id: string;
+  name: string;
+  checked: boolean;
+  weight: number;
+  tip: string;
+};
+
 type RatingBreakdown = {
   completeness: number;
   consistency: number;
   impact: number;
   powerLevel: number;
   rank: string;
+  checklist: ChecklistItem[];
   tips: string[];
 };
 
@@ -28,11 +37,11 @@ function App() {
   const [activeTab, setActiveTab] = useState<'overview' | 'ratings' | 'readme'>('overview');
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [usernameInput, setUsernameInput] = useState<string>('');
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [rating, setRating] = useState<RatingBreakdown | null>(null);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
 
   // Sync active theme class to HTML body element
   useEffect(() => {
@@ -54,8 +63,11 @@ function App() {
         body: JSON.stringify(profile),
       });
       if (response.ok) {
-        const ratingData = await response.json();
+        const ratingData: RatingBreakdown = await response.json();
         setRating(ratingData);
+        if (ratingData.checklist) {
+          setChecklist(ratingData.checklist);
+        }
         
         // Sync rank and power level back to the profile display
         if (ratingData.powerLevel !== profile.powerLevel || ratingData.rank !== profile.rank) {
@@ -76,9 +88,56 @@ function App() {
     }
   };
 
+  const handleToggleCheck = (id: string) => {
+    setChecklist((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === id) {
+          return { ...item, checked: !item.checked };
+        }
+        return item;
+      });
+
+      // Recalculate completeness
+      const newCompleteness = updated.reduce((acc, item) => acc + (item.checked ? item.weight : 0), 0);
+
+      // Recalculate power level and rank based on new completeness
+      const newPowerLevel = Math.max(10, Math.min(100, Math.floor(newCompleteness * 0.3 + (rating?.consistency || 0) * 0.4 + (rating?.impact || 0) * 0.3)));
+      let newRank = 'Bronze IV';
+      if (newPowerLevel > 85) newRank = 'Challenger I';
+      else if (newPowerLevel > 70) newRank = 'Diamond IV';
+      else if (newPowerLevel > 55) newRank = 'Gold III';
+      else if (newPowerLevel > 35) newRank = 'Silver II';
+
+      // Update rating breakdown state
+      setRating((prevRating) => {
+        if (!prevRating) return null;
+        return {
+          ...prevRating,
+          completeness: newCompleteness,
+          powerLevel: newPowerLevel,
+          rank: newRank,
+        };
+      });
+
+      // Also sync back to profile for rendering avatar/rank on sidebar
+      setProfile((prevProf) => ({
+        ...prevProf,
+        powerLevel: newPowerLevel,
+        rank: newRank,
+        title: `Developer Tier: ${newRank}`,
+        analysis: {
+          ...prevProf.analysis,
+          powerLevel: `${newPowerLevel}/100`,
+        }
+      }));
+
+      return updated;
+    });
+  };
+
   const handleGenerateProfile = async () => {
-    if (!usernameInput.trim() && !resumeFile) {
-      setErrorMessage('Please enter a GitHub username or select a resume file.');
+    if (!usernameInput.trim()) {
+      setErrorMessage('Please enter a GitHub username.');
       return;
     }
 
@@ -87,158 +146,18 @@ function App() {
     setSuccessMessage('');
 
     try {
-      let currentProfile = characterProfile;
-
-      // 1. Fetch GitHub data if username is provided
-      if (usernameInput.trim()) {
-        const response = await fetch(`/api/github?username=${encodeURIComponent(usernameInput.trim())}`);
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || 'Failed to fetch GitHub profile details.');
-        }
-        currentProfile = await response.json();
-      } else {
-        // Fallback placeholder profile name if only uploading resume
-        currentProfile = {
-          ...characterProfile,
-          name: 'Adventurer Coder',
-          battleTag: 'Adventurer#9999',
-          guild: 'Independent Mercenary',
-          avatarInitials: 'AC',
-        };
+      const response = await fetch(`/api/github?username=${encodeURIComponent(usernameInput.trim())}`);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to fetch GitHub profile details.');
       }
-
-      // 2. Parse and merge resume if file is selected
-      if (resumeFile) {
-        const arrayBuffer = await resumeFile.arrayBuffer();
-        const response = await fetch(`/api/resume?name=${encodeURIComponent(resumeFile.name)}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': resumeFile.type || 'application/octet-stream',
-          },
-          body: arrayBuffer,
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || 'Failed to parse resume file.');
-        }
-
-        const resumeData = await response.json();
-
-        // Merge resume skills
-        const mergedSkills = [...currentProfile.skillTree];
-        resumeData.skills.forEach((newSkill: any) => {
-          const existingIndex = mergedSkills.findIndex(
-            (s) => s.name.toLowerCase() === newSkill.name.toLowerCase()
-          );
-          if (existingIndex > -1) {
-            mergedSkills[existingIndex].level = Math.max(mergedSkills[existingIndex].level, newSkill.level);
-          } else {
-            mergedSkills.push(newSkill);
-          }
-        });
-
-        // Merge achievements
-        const mergedAchievements = [...currentProfile.achievements];
-        resumeData.achievements.forEach((newAch: any) => {
-          if (!mergedAchievements.some((a) => a.title.toLowerCase() === newAch.title.toLowerCase())) {
-            mergedAchievements.push(newAch);
-          }
-        });
-
-        const className = resumeData.suggestedClass || currentProfile.className;
-
-        currentProfile = {
-          ...currentProfile,
-          className,
-          achievements: mergedAchievements,
-          skillTree: mergedSkills,
-          guild: resumeData.education !== 'Self-taught Adventurer' ? `${resumeData.education} Guild` : currentProfile.guild,
-          analysis: {
-            ...currentProfile.analysis,
-            characterClass: className,
-            strengths: Array.from(new Set([...currentProfile.analysis.strengths, ...resumeData.skills.slice(0, 2).map((s: any) => s.name)])),
-          }
-        };
-      }
-
+      const currentProfile = await response.json();
       setProfile(currentProfile);
       setIsLoaded(true);
-      setSuccessMessage(usernameInput.trim() ? `Generated RPG profile for ${currentProfile.name}!` : 'Generated RPG profile from resume!');
+      setSuccessMessage(`Generated RPG profile for ${currentProfile.name}!`);
     } catch (err: any) {
       console.error(err);
       setErrorMessage(err.message || 'Error compiling profile data.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSidebarResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const response = await fetch(`/api/resume?name=${encodeURIComponent(file.name)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': file.type || 'application/octet-stream',
-        },
-        body: arrayBuffer,
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Failed to parse resume file.');
-      }
-
-      const resumeData = await response.json();
-      
-      setProfile((prev) => {
-        const mergedSkills = [...prev.skillTree];
-        resumeData.skills.forEach((newSkill: any) => {
-          const existingIndex = mergedSkills.findIndex(
-            (s) => s.name.toLowerCase() === newSkill.name.toLowerCase()
-          );
-          if (existingIndex > -1) {
-            mergedSkills[existingIndex].level = Math.max(mergedSkills[existingIndex].level, newSkill.level);
-          } else {
-            mergedSkills.push(newSkill);
-          }
-        });
-
-        const mergedAchievements = [...prev.achievements];
-        resumeData.achievements.forEach((newAch: any) => {
-          if (!mergedAchievements.some((a) => a.title.toLowerCase() === newAch.title.toLowerCase())) {
-            mergedAchievements.push(newAch);
-          }
-        });
-
-        const className = resumeData.suggestedClass || prev.className;
-
-        return {
-          ...prev,
-          className,
-          achievements: mergedAchievements,
-          skillTree: mergedSkills,
-          guild: resumeData.education !== 'Self-taught Adventurer' ? `${resumeData.education} Guild` : prev.guild,
-          analysis: {
-            ...prev.analysis,
-            characterClass: className,
-            strengths: Array.from(new Set([...prev.analysis.strengths, ...resumeData.skills.slice(0, 2).map((s: any) => s.name)])),
-          }
-        };
-      });
-
-      setSuccessMessage(`Resume parsed successfully! Character stats upgraded!`);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.message || 'Error processing resume file.');
     } finally {
       setLoading(false);
     }
@@ -303,22 +222,6 @@ function App() {
                   style={{ height: '38px', padding: '0 12px' }}
                   aria-label="GitHub Username"
                 />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>Upload Resume (Optional)</label>
-                <div className="file-dropzone" style={{ padding: '16px' }}>
-                  <span className="upload-icon">📂</span>
-                  <strong style={{ fontSize: '0.8rem', display: 'block' }}>
-                    {resumeFile ? resumeFile.name : 'Select PDF or DOCX Resume'}
-                  </strong>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx"
-                    onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
-                    aria-label="Upload PDF or DOCX resume"
-                  />
-                </div>
               </div>
 
               <button
@@ -414,21 +317,6 @@ function App() {
 
               {/* Character Origin selector customization */}
               <OriginSelector origins={originThemes} />
-
-              {/* Resume Upgrader widget */}
-              <section className="card" id="resume-uploader" style={{ padding: '16px' }}>
-                <h3 style={{ fontSize: '0.88rem', fontWeight: 600, margin: '0 0 10px 0' }}>📂 Resume Upgrader</h3>
-                <div className="file-dropzone" style={{ padding: '12px' }}>
-                  <span className="upload-icon">📂</span>
-                  <strong style={{ fontSize: '0.78rem', display: 'block' }}>Upload Resume (PDF/DOCX)</strong>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx"
-                    onChange={handleSidebarResumeUpload}
-                    aria-label="Upload PDF or DOCX resume"
-                  />
-                </div>
-              </section>
             </aside>
 
             {/* Right Side: Tabbed Content Panel */}
@@ -448,121 +336,177 @@ function App() {
 
               {/* TAB 1: CHARACTER SHEET OVERVIEW */}
               {activeTab === 'overview' && (
-                <>
-                  {/* Combat Statistics Panel */}
-                  <StatPanel stats={profile.stats} />
-
-                  {/* Activity Calendar Chart */}
-                  <section className="card contrib-calendar" style={{ padding: '20px' }}>
-                    <div className="section-head">
-                      <h3>Activity Calendar</h3>
-                      <p className="subtle">Daily developer activity levels logged in the sandbox simulation.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Top Row: Combat Stats & Activity on left, Skill Tree on right */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <StatPanel stats={profile.stats} />
+                      
+                      <section className="card contrib-calendar" style={{ padding: '20px', margin: 0 }}>
+                        <div className="section-head">
+                          <h3>Activity Grid</h3>
+                        </div>
+                        <div className="contrib-grid-wrapper">
+                          <div className="contrib-grid" style={{ gap: '2px' }}>
+                            {Array.from({ length: 70 }).map((_, idx) => {
+                              const level = idx % 11 === 0 ? 'level-4' : idx % 7 === 0 ? 'level-3' : idx % 5 === 0 ? 'level-2' : idx % 3 === 0 ? 'level-1' : '';
+                              return <div key={idx} className={`contrib-box ${level}`} style={{ width: '10px', height: '10px' }} title="Activity cell"></div>;
+                            })}
+                          </div>
+                        </div>
+                      </section>
                     </div>
-                    <div className="contrib-grid-wrapper">
-                      <div className="contrib-grid">
-                        {Array.from({ length: 105 }).map((_, idx) => {
-                          const level = idx % 11 === 0 ? 'level-4' : idx % 7 === 0 ? 'level-3' : idx % 5 === 0 ? 'level-2' : idx % 3 === 0 ? 'level-1' : '';
-                          return <div key={idx} className={`contrib-box ${level}`} title="Contribution activity square"></div>;
+
+                    <section className="card" style={{ padding: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div className="section-head">
+                        <h3>Language Mastery &amp; Skills</h3>
+                      </div>
+                      <div className="lang-distribution-bar" style={{ margin: 0 }}>
+                        {profile.skillTree.filter(s => s.branch === 'Core Magic' || s.branch === 'Deep Systems').map((skill, idx) => {
+                          const colors = ['#f1e05a', '#3572A5', '#00ADD8', '#bc8cff', '#58a6ff'];
+                          return (
+                            <div
+                              key={skill.name}
+                              className="lang-distribution-segment"
+                              style={{
+                                width: `${100 / Math.max(1, profile.skillTree.filter(s => s.branch === 'Core Magic' || s.branch === 'Deep Systems').length)}%`,
+                                backgroundColor: colors[idx % colors.length]
+                              }}
+                              title={`${skill.name}: ${skill.level}%`}
+                            ></div>
+                          );
                         })}
                       </div>
-                      <div className="contrib-footer">
-                        <span>Learn how we audit contribution logs</span>
-                        <div className="contrib-legend">
-                          <span>Less</span>
-                          <div className="contrib-box"></div>
-                          <div className="contrib-box level-1"></div>
-                          <div className="contrib-box level-2"></div>
-                          <div className="contrib-box level-3"></div>
-                          <div className="contrib-box level-4"></div>
-                          <span>More</span>
-                        </div>
-                      </div>
+                      <SkillTree skills={profile.skillTree.slice(0, 5)} />
+                    </section>
+                  </div>
+
+                  {/* Bottom Row: Quest Board on left, Achievements & Analysis on right */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                    <QuestBoard repositories={profile.repositories} />
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <AchievementVault achievements={profile.achievements.slice(0, 4)} />
+                      <AnalysisReport report={profile.analysis} />
                     </div>
-                  </section>
-
-                  {/* Repository Quests */}
-                  <QuestBoard repositories={profile.repositories} />
-
-                  {/* Achievements Vault */}
-                  <AchievementVault achievements={profile.achievements} />
-
-                  {/* Language segment bar & Skill Tree */}
-                  <section className="card" style={{ padding: '24px' }}>
-                    <div className="section-head">
-                      <h3>Language Distribution &amp; Skill Tree</h3>
-                      <p className="subtle">Codebase language percentages compiled from repository bytes alongside core developer skills.</p>
-                    </div>
-                    <div className="lang-distribution-bar">
-                      {profile.skillTree.filter(s => s.branch === 'Core Magic' || s.branch === 'Deep Systems').map((skill, idx) => {
-                        const colors = ['#f1e05a', '#3572A5', '#00ADD8', '#bc8cff', '#58a6ff'];
-                        return (
-                          <div
-                            key={skill.name}
-                            className="lang-distribution-segment"
-                            style={{
-                              width: `${100 / Math.max(1, profile.skillTree.filter(s => s.branch === 'Core Magic' || s.branch === 'Deep Systems').length)}%`,
-                              backgroundColor: colors[idx % colors.length]
-                            }}
-                            title={`${skill.name}: ${skill.level}%`}
-                          ></div>
-                        );
-                      })}
-                    </div>
-                    <SkillTree skills={profile.skillTree} />
-                  </section>
-
-                  {/* Diagnostic report */}
-                  <AnalysisReport report={profile.analysis} />
-                </>
+                  </div>
+                </div>
               )}
 
               {/* TAB 2: PROFILE RATINGS */}
               {activeTab === 'ratings' && rating && (
-                <section className="card" id="rating-breakdown" style={{ padding: '20px' }}>
+                <section className="card" id="rating-breakdown" style={{ padding: '24px' }}>
                   <div className="section-head">
-                    <h3>Profile Integrity Ratings</h3>
-                    <p className="subtle">Quantitative scores evaluating completeness, activity volumes, and repository social impact.</p>
+                    <h3>Profile Integrity Ratings &amp; Checklist</h3>
+                    <p className="subtle">Quantitative scores evaluating completeness, activity volumes, and repository social impact. Complete checklist items to hit 100%!</p>
                   </div>
                   <div className="rating-breakdown-card">
-                    <div className="rating-grid">
-                      <div className="rating-bar-container">
-                        <div className="rating-bar-label">
-                          <span>Profile Completeness</span>
-                          <strong>{rating.completeness}%</strong>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'start' }}>
+                      {/* Left: Progression Scores & Tips */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div className="rating-grid" style={{ display: 'flex', flexDirection: 'column', gap: '16px', margin: 0 }}>
+                          <div className="rating-bar-container">
+                            <div className="rating-bar-label">
+                              <span>Profile Completeness</span>
+                              <strong>{rating.completeness}%</strong>
+                            </div>
+                            <div className="rating-bar-track">
+                              <div className="rating-bar-fill" style={{ width: `${rating.completeness}%` }}></div>
+                            </div>
+                          </div>
+
+                          <div className="rating-bar-container">
+                            <div className="rating-bar-label">
+                              <span>Contribution Consistency</span>
+                              <strong>{rating.consistency}%</strong>
+                            </div>
+                            <div className="rating-bar-track">
+                              <div className="rating-bar-fill" style={{ width: `${rating.consistency}%` }}></div>
+                            </div>
+                          </div>
+
+                          <div className="rating-bar-container">
+                            <div className="rating-bar-label">
+                              <span>Social Impact</span>
+                              <strong>{rating.impact}%</strong>
+                            </div>
+                            <div className="rating-bar-track">
+                              <div className="rating-bar-fill" style={{ width: `${rating.impact}%` }}></div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="rating-bar-track">
-                          <div className="rating-bar-fill" style={{ width: `${rating.completeness}%` }}></div>
+
+                        <div className="tips-box" style={{ marginTop: '10px' }}>
+                          <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>💡</span> Progression Recommendations
+                          </h4>
+                          <ul style={{ paddingLeft: '18px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {rating.tips.map((tip, idx) => (
+                              <li key={idx} style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>{tip}</li>
+                            ))}
+                          </ul>
                         </div>
                       </div>
 
-                      <div className="rating-bar-container">
-                        <div className="rating-bar-label">
-                          <span>Contribution Consistency</span>
-                          <strong>{rating.consistency}%</strong>
-                        </div>
-                        <div className="rating-bar-track">
-                          <div className="rating-bar-fill" style={{ width: `${rating.consistency}%` }}></div>
+                      {/* Right: Integrity Checklist */}
+                      <div className="card" style={{ padding: '20px', backgroundColor: 'var(--bg-deep)', border: '1px solid var(--line-strong)', borderRadius: '6px' }}>
+                        <h4 style={{ fontSize: '0.92rem', fontWeight: 700, margin: '0 0 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>🛡️ Integrity Checklist</span>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--git-green)', fontWeight: 600 }}>
+                            {rating.completeness === 100 ? '🎉 100% Complete!' : `${rating.completeness}% Cleared`}
+                          </span>
+                        </h4>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {checklist.map((item) => (
+                            <label
+                              key={item.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: '12px',
+                                padding: '12px',
+                                border: '1px solid var(--line-strong)',
+                                borderRadius: '6px',
+                                backgroundColor: item.checked ? 'rgba(46, 164, 79, 0.04)' : 'var(--bg-panel)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                borderLeft: item.checked ? '3px solid var(--git-green)' : '3px solid var(--line-soft)'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={item.checked}
+                                onChange={() => handleToggleCheck(item.id)}
+                                style={{
+                                  marginTop: '3px',
+                                  width: '16px',
+                                  height: '16px',
+                                  cursor: 'pointer',
+                                  accentColor: 'var(--git-green)'
+                                }}
+                                aria-label={item.name}
+                              />
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ 
+                                  fontSize: '0.85rem', 
+                                  fontWeight: 600, 
+                                  color: item.checked ? 'var(--git-green)' : 'var(--text-main)',
+                                  textDecoration: item.checked ? 'line-through' : 'none',
+                                  opacity: item.checked ? 0.75 : 1
+                                }}>
+                                  {item.name} <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>(+{item.weight}%)</span>
+                                </span>
+                                {!item.checked && (
+                                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                                    {item.tip}
+                                  </span>
+                                )}
+                              </div>
+                            </label>
+                          ))}
                         </div>
                       </div>
-
-                      <div className="rating-bar-container">
-                        <div className="rating-bar-label">
-                          <span>Social Impact</span>
-                          <strong>{rating.impact}%</strong>
-                        </div>
-                        <div className="rating-bar-track">
-                          <div className="rating-bar-fill" style={{ width: `${rating.impact}%` }}></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="tips-box" style={{ marginTop: '14px' }}>
-                      <h4>💡 Progression Recommendations</h4>
-                      <ul>
-                        {rating.tips.map((tip, idx) => (
-                          <li key={idx}>{tip}</li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 </section>
