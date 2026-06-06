@@ -1,421 +1,576 @@
-.side-nav {
-  border-radius: var(--radius-lg);
-  border: 4px solid var(--line-strong);
-  background:
-    radial-gradient(circle at 84% 9%, rgba(18, 200, 255, 0.18), transparent 40%),
-    linear-gradient(180deg, rgba(255, 250, 240, 0.98), rgba(245, 238, 223, 0.96));
-  padding: 18px 16px;
-  position: sticky;
-  top: 14px;
-  align-self: start;
-  max-height: calc(100vh - 28px);
-  overflow: auto;
-  box-shadow: var(--shadow-neon);
-}
-
-.brand-block {
-  padding-bottom: 14px;
-  border-bottom: 4px solid var(--line-strong);
-  margin-bottom: 12px;
-}
-
-.brand-block h1 {
-  font-size: 2rem;
-  line-height: 0.95;
-  color: var(--text-main);
-}
-
-.side-nav nav {
-  display: grid;
-  gap: 6px;
-}
-
-.side-nav nav a {
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  border: 3px solid rgba(16, 17, 20, 0.12);
-  background: #fffaf0;
-  color: var(--text-muted);
-  transition: border-color 180ms ease, transform 180ms ease, color 180ms ease;
-}
-
-.side-nav nav a:hover {
-  border-color: var(--line-strong);
-  color: var(--text-main);
-  background: #f0dfb6;
-  transform: translateX(3px);
-}
-
+/* eslint-disable */
+/* GITHUB-STYLE PROFILE PANEL (Left Sidebar) */
 .profile-panel {
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
-.profile-panel::after {
-  content: '';
-  position: absolute;
-  top: -55px;
-  right: -25px;
-  width: 170px;
-  height: 170px;
-  border-radius: 100%;
-  background: radial-gradient(circle, rgba(18, 200, 255, 0.24), transparent 68%);
-}
-
-.profile-head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+.profile-head-sidebar {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
-  margin-bottom: 15px;
 }
 
-.avatar-badge {
-  width: 62px;
-  height: 62px;
+.avatar-badge-circle {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(135deg, #bc8cff, #8a2be2);
+  color: #ffffff;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  border: 4px solid var(--line-strong);
-  background: linear-gradient(135deg, rgba(255, 214, 87, 0.74), rgba(0, 224, 143, 0.38));
-  box-shadow: 8px 8px 0 rgba(16, 17, 20, 0.12);
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 5rem;
+  box-shadow: var(--shadow-neon);
+  overflow: hidden;
+  position: relative;
 }
 
-.rank-chip {
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 4px solid var(--line-strong);
+.avatar-badge-circle::after {
+  content: 'LVL';
+  position: absolute;
+  bottom: 12px;
+  background-color: var(--line-strong);
   color: var(--text-main);
-  font-weight: 700;
-  background: #f0dfb6;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
-.profile-meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+.profile-names {
+  margin-top: 8px;
 }
 
-.profile-meta div {
-  padding: 10px;
-  border-radius: var(--radius-md);
-  background: #fffaf0;
-  border: 3px solid rgba(16, 17, 20, 0.14);
-  display: grid;
-  gap: 3px;
+.profile-names h2 {
+  font-size: 1.62rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.25;
+  margin: 0;
 }
 
-.profile-meta span {
+.profile-names .battle-tag {
+  font-size: 1.15rem;
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-weight: 300;
+  margin-top: 2px;
 }
 
-.xp-row {
-  display: grid;
+.profile-bio {
+  font-size: 0.88rem;
+  color: var(--text-main);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.rank-chip-github {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--line-strong);
+  background-color: var(--bg-panel);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  width: fit-content;
+}
+
+.profile-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  border-top: 1px solid var(--line-strong);
+  padding-top: 16px;
+  margin-top: 8px;
+}
+
+.profile-meta-item {
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.xp-labels {
-  display: flex;
-  justify-content: space-between;
+.profile-meta-item svg,
+.profile-meta-item span.icon {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  width: 16px;
+  text-align: center;
 }
 
-.xp-track,
-.skill-meter {
-  width: 100%;
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(16, 17, 20, 0.14);
+/* XP Progress indicator */
+.xp-row-sidebar {
+  border-top: 1px solid var(--line-strong);
+  padding-top: 16px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.xp-row-sidebar span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* GITHUB PINNED REPOSITORIES GRID (Quest Board) */
+.quest-grid-pinned {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.quest-card-pinned {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+
+.quest-card-pinned:hover {
+  border-color: var(--git-blue);
+}
+
+.quest-card-pinned.active {
+  border-left: 3px solid var(--git-orange);
+}
+
+.quest-card-pinned.locked {
+  opacity: 0.65;
+  background-color: rgba(110, 118, 129, 0.05);
+}
+
+.quest-pinned-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.quest-pinned-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quest-pinned-title h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--git-blue);
+}
+
+.quest-pinned-title h4:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.quest-public-badge {
+  font-size: 0.72rem;
+  border: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.quest-pinned-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
   overflow: hidden;
-  border: 4px solid var(--line-strong);
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-.xp-track span,
-.skill-meter span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--electric-blue), var(--cyan-core), var(--gold-core), var(--emerald-core));
-  transform-origin: left;
-  animation: grow 1150ms cubic-bezier(0.25, 0.8, 0.2, 1);
+.quest-pinned-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
-.stat-grid {
+.quest-lang-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  vertical-align: text-top;
+  margin-right: 4px;
+}
+
+.quest-status-badge {
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 600;
+  background-color: var(--line-soft);
+  color: var(--text-main);
+}
+
+.quest-status-badge.active {
+  background-color: rgba(240, 136, 62, 0.15);
+  color: var(--git-orange);
+}
+
+.quest-status-badge.locked {
+  background-color: rgba(248, 81, 73, 0.1);
+  color: var(--git-red);
+}
+
+/* STAT TILES (Overview Grid) */
+.stat-grid-github {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.stat-tile {
+.stat-tile-github {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
   padding: 12px;
-  border-radius: var(--radius-md);
-  border: 3px solid rgba(16, 17, 20, 0.14);
-  background: #fffaf0;
-  display: grid;
+  background-color: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
   gap: 4px;
 }
 
-.stat-tile p,
-.stat-tile span {
-  color: var(--text-muted);
-  font-size: 0.82rem;
-}
-
-.stat-tile strong {
-  color: var(--frost-white);
-  font-size: 1.42rem;
-}
-
-.achievement-grid,
-.quest-grid,
-.origin-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.achievement-card,
-.quest-card {
-  padding: 12px;
-  border-radius: var(--radius-md);
-  border: 3px solid rgba(16, 17, 20, 0.14);
-  background: #fffaf0;
-  display: grid;
-  gap: 5px;
-  opacity: 0;
-  transform: translateY(8px);
-  animation: reveal 500ms ease forwards;
-}
-
-.achievement-card .tier {
-  color: var(--gold-core);
-  text-transform: uppercase;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-}
-
-.quest-card.unlocked {
-  border-color: rgba(16, 17, 20, 0.2);
-  box-shadow: inset 8px 0 0 rgba(16, 17, 20, 0.12);
-}
-
-.quest-card.active {
-  border-color: rgba(16, 17, 20, 0.2);
-  box-shadow: inset 8px 0 0 rgba(0, 109, 255, 0.22);
-}
-
-.quest-card.locked {
-  border-color: rgba(16, 17, 20, 0.16);
-}
-
-.quest-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: baseline;
-}
-
-.quest-head span {
+.stat-tile-github p {
+  margin: 0;
   font-size: 0.75rem;
-  color: var(--electric-blue);
+  font-weight: 600;
+  color: var(--text-muted);
   text-transform: uppercase;
 }
 
-.quest-meta {
+.stat-tile-github strong {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.stat-tile-github span {
+  font-size: 0.72rem;
+  color: var(--git-green);
+}
+
+/* ACHIEVEMENTS GRID (Vault) */
+.achievement-grid-github {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.achievement-card-github {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 16px;
+  background-color: var(--bg-panel);
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.15s ease;
+}
+
+.achievement-card-github:hover {
+  transform: translateY(-2px);
+}
+
+.achievement-card-github .tier-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 12px;
+  width: fit-content;
+  text-transform: uppercase;
+}
+
+.achievement-card-github .tier-badge.gold {
+  background-color: rgba(240, 136, 62, 0.15);
+  color: var(--git-orange);
+}
+
+.achievement-card-github .tier-badge.silver {
+  background-color: rgba(88, 166, 255, 0.15);
+  color: var(--git-blue);
+}
+
+.achievement-card-github .tier-badge.bronze {
+  background-color: rgba(139, 148, 158, 0.15);
   color: var(--text-muted);
 }
 
-.skill-list {
-  display: grid;
-  gap: 8px;
+.achievement-card-github .tier-badge.emerald {
+  background-color: rgba(46, 164, 79, 0.15);
+  color: var(--git-green);
 }
 
-.skill-node {
-  padding: 10px;
-  border-radius: var(--radius-md);
-  border: 3px solid rgba(16, 17, 20, 0.14);
-  background: #fffaf0;
-  display: grid;
-  grid-template-columns: 1.3fr 2fr auto;
-  align-items: center;
+.achievement-card-github .tier-badge.cyan {
+  background-color: rgba(0, 255, 204, 0.15);
+  color: #00ffcc;
+}
+
+.achievement-card-github h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.achievement-card-github p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* SKILL LIST & METERS */
+.skill-list-github {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.skill-node p {
-  color: var(--text-muted);
-  font-size: 0.8rem;
+.skill-node-github {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 12px 16px;
+  background-color: var(--bg-panel);
+  display: grid;
+  grid-template-columns: 180px 1fr 60px;
+  align-items: center;
+  gap: 16px;
 }
 
-.origin-card {
-  appearance: none;
-  border: 3px solid rgba(16, 17, 20, 0.16);
-  background: #fffaf0;
-  border-radius: var(--radius-md);
-  padding: 12px;
+.skill-node-github h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.skill-node-github p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.skill-meter-github {
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--line-soft);
+  overflow: hidden;
+}
+
+.skill-meter-github span {
+  display: block;
+  height: 100%;
+  background-color: var(--git-blue);
+  border-radius: 4px;
+}
+
+.skill-node-github strong {
+  text-align: right;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+/* Multi-colored language distribution bar (at top of Skill Tree) */
+.lang-distribution-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background-color: var(--line-soft);
+}
+
+.lang-distribution-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* ORIGIN SELECTOR (Theme & Character builder) */
+.origin-grid-github {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.origin-card-github {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 14px;
+  background-color: var(--bg-panel);
   text-align: left;
   cursor: pointer;
-  display: grid;
-  gap: 8px;
-  transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease;
-  opacity: 0;
-  transform: translateY(8px);
-  animation: reveal 500ms ease forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.origin-card h4 {
-  color: var(--frost-white);
+.origin-card-github:hover,
+.origin-card-github.selected {
+  border-color: var(--origin-accent);
+  box-shadow: 0 0 8px rgba(88, 166, 255, 0.25);
 }
 
-.origin-card p,
-.origin-card li {
+.origin-card-github h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.origin-card-github p {
+  margin: 0;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  font-size: 0.84rem;
+  line-height: 1.4;
 }
 
-.origin-card ul {
+.origin-card-github ul {
   display: flex;
   flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.origin-card-github li {
+  font-size: 0.68rem;
+  background-color: var(--line-soft);
+  color: var(--text-main);
+  padding: 1px 6px;
+  border-radius: 12px;
+}
+
+.origin-preview-github {
+  margin-top: 16px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 
-.origin-card li {
-  border: 1px solid rgba(159, 194, 223, 0.25);
-  border-radius: 999px;
-  padding: 3px 8px;
+.origin-preview-github h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
 }
 
-.origin-card:hover,
-.origin-card.selected {
-  transform: translateY(-2px);
-  border-color: var(--origin-accent);
-  box-shadow:
-    8px 8px 0 rgba(16, 17, 20, 0.14),
-    0 0 0 4px rgba(0, 109, 255, 0.12);
+.origin-preview-github p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
-.origin-preview {
+/* ANALYSIS REPORT */
+.analysis-grid-github {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
   margin-top: 12px;
-  border-radius: var(--radius-md);
-  border: 4px solid var(--line-strong);
-  background: linear-gradient(120deg, rgba(240, 223, 182, 0.8), rgba(255, 250, 240, 0.94));
-  padding: 12px;
-  display: grid;
+}
+
+.analysis-summary-box {
+  grid-column: 1 / -1;
+  border: 1px solid var(--line-strong);
+  background-color: var(--bg-deep);
+  border-radius: 6px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
+  font-size: 0.88rem;
 }
 
-.analysis-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr;
-  gap: 12px;
+.analysis-column {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 14px;
+  background-color: var(--bg-panel);
 }
 
-.analysis-main {
-  border-radius: var(--radius-md);
-  padding: 11px;
-  border: 3px solid rgba(16, 17, 20, 0.16);
-  background: #fffaf0;
-  display: grid;
-  gap: 7px;
+.analysis-column h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
-.analysis-grid h4 {
-  margin-bottom: 6px;
+.analysis-column ul {
+  padding-left: 16px;
+  margin: 0;
+  list-style-type: disc;
 }
 
-.analysis-grid li {
+.analysis-column li {
+  font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 4px;
-  position: relative;
-  padding-left: 10px;
 }
 
-.analysis-grid li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  width: 4px;
-  height: 4px;
-  background: var(--gold-core);
-  border-radius: 100%;
-}
-
-@keyframes grow {
-  from {
-    width: 0;
-  }
-}
-
-@keyframes reveal {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 1280px) {
-  .achievement-grid,
-  .quest-grid,
-  .origin-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .analysis-grid {
-    grid-template-columns: 1fr 1fr;
+/* RESPONSIVE SUB-RULES */
+@media (max-width: 1200px) {
+  .quest-grid-pinned,
+  .origin-grid-github {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 980px) {
-  .stat-grid,
-  .achievement-grid,
-  .quest-grid,
-  .origin-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .stat-grid-github {
+    grid-template-columns: 1fr 1fr;
   }
-
-  .skill-node {
+  .achievement-grid-github {
+    grid-template-columns: 1fr 1fr;
+  }
+  .analysis-grid-github {
     grid-template-columns: 1fr;
-    gap: 8px;
   }
 }
 
 @media (max-width: 680px) {
-  .profile-head,
-  .profile-meta,
-  .stat-grid,
-  .achievement-grid,
-  .quest-grid,
-  .origin-grid,
-  .analysis-grid {
+  .stat-grid-github,
+  .achievement-grid-github {
     grid-template-columns: 1fr;
   }
-
-  .side-nav {
-    position: static;
-    max-height: none;
-    padding: 14px;
-  }
-
-  .side-nav nav {
-    grid-template-columns: 1fr 1fr;
+  .skill-node-github {
+    grid-template-columns: 1fr;
     gap: 8px;
   }
-
-  .brand-block h1 {
-    font-size: 1.7rem;
-  }
-
-  .role-switch {
-    width: 100%;
-  }
-
-  .role-pill {
-    flex: 1;
+  .skill-node-github strong {
+    text-align: left;
   }
 }

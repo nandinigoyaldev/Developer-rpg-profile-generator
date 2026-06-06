@@ -1,25 +1,84 @@
 :root {
-  --electric-blue: #006dff;
-  --cyan-core: #12c8ff;
-  --emerald-core: #10c778;
-  --gold-core: #d7aa3a;
-  --frost-white: #fffaf0;
-  --steel-light: #d7d0c1;
+  /* Default: GitHub Dark Mode */
+  --bg-void: #0d1117;
+  --bg-deep: #0d1117;
+  --bg-panel: #161b22;
 
-  --bg-void: #f4efe4;
-  --bg-deep: #fbf8f1;
-  --bg-panel: #fffaf0;
+  --text-main: #c9d1d9;
+  --text-muted: #8b949e;
 
-  --text-main: #101114;
-  --text-muted: #6f6558;
+  --line-strong: #30363d;
+  --line-soft: #21262d;
 
-  --line-strong: #101114;
-  --line-soft: rgba(16, 17, 20, 0.22);
+  --shadow-neon: 0 8px 24px rgba(1, 4, 9, 0.8);
+  --radius-lg: 6px;
+  --radius-md: 6px;
 
-  --shadow-neon:
-    0 0 0 4px rgba(16, 17, 20, 0.95),
-    10px 10px 0 rgba(16, 17, 20, 0.18),
-    0 20px 40px rgba(16, 17, 20, 0.14);
-  --radius-lg: 18px;
-  --radius-md: 12px;
+  /* GitHub language dots and statuses */
+  --git-green: #2ea44f;
+  --git-green-hover: #238636;
+  --git-blue: #58a6ff;
+  --git-red: #f85149;
+  --git-purple: #bc8cff;
+  --git-orange: #f0883e;
+}
+
+/* GITHUB LIGHT 🤍 */
+.theme-github-light {
+  --bg-void: #f6f8fa;
+  --bg-deep: #ffffff;
+  --bg-panel: #ffffff;
+  --text-main: #24292f;
+  --text-muted: #57606a;
+  --line-strong: #d0d7de;
+  --line-soft: #ebf0f4;
+  --shadow-neon: 0 8px 24px rgba(140, 149, 159, 0.2);
+}
+
+/* GITHUB DARK (explicit class) 🖤 */
+.theme-github-dark {
+  --bg-void: #0d1117;
+  --bg-deep: #0d1117;
+  --bg-panel: #161b22;
+  --text-main: #c9d1d9;
+  --text-muted: #8b949e;
+  --line-strong: #30363d;
+  --line-soft: #21262d;
+  --shadow-neon: 0 8px 24px rgba(1, 4, 9, 0.8);
+}
+
+/* GITHUB DIM 🐨 */
+.theme-github-dim {
+  --bg-void: #1c2128;
+  --bg-deep: #22272e;
+  --bg-panel: #2d333b;
+  --text-main: #adbac7;
+  --text-muted: #768390;
+  --line-strong: #444c56;
+  --line-soft: #373e47;
+  --shadow-neon: 0 8px 24px rgba(10, 12, 16, 0.7);
+}
+
+/* GITHUB CYBERPUNK ⚡ */
+.theme-github-cyberpunk {
+  --bg-void: #0c0d12;
+  --bg-deep: #0f111a;
+  --bg-panel: #141824;
+  --text-main: #58a6ff;
+  --text-muted: #c9d1d9;
+  --line-strong: #30363d;
+  --line-soft: #00ffcc;
+  --shadow-neon: 0 0 15px rgba(88, 166, 255, 0.4);
+}
+
+/* GITHUB SAKURA 🌸 */
+.theme-github-sakura {
+  --bg-void: #fff5f5;
+  --bg-deep: #ffffff;
+  --bg-panel: #ffffff;
+  --text-main: #24292f;
+  --text-muted: #ff8da1;
+  --line-strong: #ffd0d8;
+  --line-soft: #ffeef0;
+  --shadow-neon: 0 8px 24px rgba(255, 141, 161, 0.15);
 }
