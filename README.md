@@ -3,7 +3,7 @@
   <h1>Developer RPG Profile Generator</h1>
   
   <p>
-    Turn your GitHub profile (and optionally your resume) into an RPG-style character sheet,
+    Turn your GitHub profile into an RPG-style character sheet,
     then export a themed <code>README.md</code> you can paste into your GitHub profile.
   </p>
 
@@ -61,9 +61,8 @@
 1. Enter a <strong>GitHub username</strong> (public mode) or sign in with GitHub (OAuth).
 2. The app fetches your profile, repository stats, PR merges, and contribution streak.
 3. Your character sheet is generated: <strong>class</strong>, <strong>rank</strong>, <strong>power level</strong>, a <strong>skill tree</strong>, and a <strong>quest log</strong>.
-4. (Optional) Upload your resume (PDF/DOCX) to extract skills and unlock achievements.
-5. Use <strong>README Generator</strong> to copy / download your themed <code>README.md</code>.
-6. Use <strong>Repo Analyzer</strong> to audit any public repository and get actionable advice to improve it.
+4. Use <strong>README Generator</strong> to copy / download your themed <code>README.md</code>.
+5. Use <strong>Repo Analyzer</strong> to audit any public repository and get actionable advice to improve it.
 
 ---
 
@@ -79,9 +78,6 @@
   - Quest board (repos mapped to locked/active/unlocked)
   - Skill tree (language masteries + engineering lifecycle skills)
   - Diagnostics report (strengths, gaps, next recommendations)
-- <strong>Resume Upgrader (Optional)</strong>
-  - Parse PDF/DOCX on the server via <code>/api/resume</code>
-  - Merge extracted skills into your dashboard
 - <strong>Dynamic Themes</strong>
   - Gaming, Cute, Cloud, Cyberpunk, Minimalist
 - <strong>README.md Generator</strong>
@@ -121,8 +117,7 @@
 1. Open the app and enter a <strong>GitHub username</strong> (public mode) or sign in with GitHub (OAuth).
 2. The backend fetches your GitHub profile, repositories, commit/PR counts, and contribution activity.
 3. The app converts those metrics into RPG-style stats: <strong>class, rank, power level</strong>, a <strong>skill tree</strong>, and a <strong>quest log</strong>.
-4. (Optional) Upload your resume (PDF/DOCX). We extract skill keywords and upgrade your skill tree + achievements.
-5. Go to <strong>README Generator</strong> and export a themed <code>README.md</code> for your GitHub profile (copy or download).
+4. Go to <strong>README Generator</strong> and export a themed <code>README.md</code> for your GitHub profile (copy or download).
 
 
 ---
@@ -144,20 +139,16 @@
    - **Skill Tree**: Progress meters showing language masteries (calculated from repository bytes) alongside engineering lifecycle skills (Git, CI/CD, Testing).
    - **Diagnostics Performance Report**: Formulates strengths, weaknesses, missing skills, and next recommended quests.
 
-3. **Resume Upgrader (Optional)**
-   - Upload PDF or DOCX resumes directly in the sandbox to parse experience metrics.
-   - Parses document text on the server (`/api/resume`), extracts skills, and merges them to upgrade your dashboard Skill Tree and unlock special achievements (e.g. "Battle Hardened", "Scholar Archetype").
-
-4. **Dynamic Visual Themes**
+3. **Dynamic Visual Themes**
    - Five prebuilt dashboard themes: **Gaming 🎮**, **Cute 🌸**, **Cloud ☁️**, **Cyberpunk ⚡**, and **Minimalist 🖤**.
    - Redefines design tokens (backgrounds, fonts, shadows, borders, and corner rounding) to visually transform the interface instantly.
 
-5. **README.md Generator**
+4. **README.md Generator**
    - Renders a markdown string based on your active dashboard statistics, skills, achievements, and selected theme.
    - Features dynamic text-based progress bars, shields.io badges, and quest logs.
    - Provides options to copy to clipboard or download as a `.md` file.
 
-6. **Repository Analyzer (Advisory System)**
+5. **Repository Analyzer (Advisory System)**
    - Analyze any public repository link instantly.
    - Extracts top-level directory structure and evaluates community standards (README, License, Description, Live Deployment URL).
    - Instead of just displaying raw data, the Analyzer acts as an **Advisory System**, generating actionable guidance on how to improve the repository's health, SEO, and developer experience.
@@ -170,8 +161,7 @@
 ├── api/                          # Vercel Serverless Backend Functions (Node.js)
 │   ├── github.ts                 # Fetches GitHub profile details, events, and repo stats
 │   ├── rating.ts                 # Evaluates profile completeness, consistency, and impact scores
-│   ├── readme.ts                 # Compiles themed markdown layouts (5 prebuilt styles)
-│   └── resume.ts                 # Deciphers text from PDF and DOCX binary resumes
+│   └── readme.ts                 # Compiles themed markdown layouts (5 prebuilt styles)
 ├── src/
 │   ├── components/               # React Presentation & Feature Widgets
 │   │   ├── AchievementVault.tsx  # Grid of developer milestones

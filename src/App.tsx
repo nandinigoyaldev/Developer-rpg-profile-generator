@@ -37,7 +37,6 @@ function App() {
   const [activeTab, setActiveTab] = useState<'overview' | 'ratings' | 'readme' | 'repo-analyzer'>('overview');
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [usernameInput, setUsernameInput] = useState<string>('');
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -138,9 +137,8 @@ function App() {
   };
 
   const handleGenerateProfile = async () => {
-    // Username is optional when a resume is uploaded (but still supported).
-    if (!usernameInput.trim() && !resumeFile) {
-      setErrorMessage('Please enter a GitHub username or upload a resume.');
+    if (!usernameInput.trim()) {
+      setErrorMessage('Please enter a GitHub username.');
       return;
     }
 
@@ -149,110 +147,20 @@ function App() {
     setSuccessMessage('');
 
     try {
-      // 1) Fetch GitHub profile (if username provided)
+      // Fetch GitHub profile
       let currentProfile: DeveloperProfile = JSON.parse(JSON.stringify(characterProfile)) as DeveloperProfile;
-      if (usernameInput.trim()) {
-        const response = await fetch(
-          `/api/github?username=${encodeURIComponent(usernameInput.trim())}`,
-        );
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || 'Failed to fetch GitHub profile details.');
-        }
-        currentProfile = await response.json();
+      const response = await fetch(
+        `/api/github?username=${encodeURIComponent(usernameInput.trim())}`,
+      );
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to fetch GitHub profile details.');
       }
-
-      // 2) If resume uploaded, parse + merge into the profile
-      if (resumeFile) {
-        const resumeRes = await fetch('/api/resume?name=' + encodeURIComponent(resumeFile.name), {
-          method: 'POST',
-          headers: {
-            'Content-Type': resumeFile.type || 'application/octet-stream'
-          },
-          body: resumeFile,
-        });
-
-        if (!resumeRes.ok) {
-          const err = await resumeRes.json().catch(() => ({}));
-          throw new Error(err.error || 'Failed to parse resume file.');
-        }
-
-        const resumeData = await resumeRes.json();
-
-        // Merge resume-derived info into the RPG profile.
-        const mergedSkills = (() => {
-          const skillMap = new Map<string, { name: string; level: number; branch: string }>();
-
-          // Start with existing skills
-          currentProfile.skillTree.forEach((s) => skillMap.set(s.name, { ...s }));
-
-          // Merge/override with resume skills (dedupe by name)
-          (resumeData.skills || []).forEach((s: any) => {
-            const existing = skillMap.get(s.name);
-            skillMap.set(s.name, {
-              name: s.name,
-              level: typeof s.level === 'number' ? s.level : existing?.level ?? 60,
-              branch: s.branch ?? existing?.branch ?? 'Rune Control',
-            });
-          });
-
-          // Sort by level desc to keep UI meaningful
-          return Array.from(skillMap.values()).sort((a, b) => {
-            const al = typeof a.level === 'number' ? a.level : 0;
-            const bl = typeof b.level === 'number' ? b.level : 0;
-            return bl - al;
-          });
-
-        })();
-
-        const mergedAchievements = (() => {
-          const seen = new Set<string>();
-          const out: any[] = [];
-
-          // keep GitHub achievements first
-          currentProfile.achievements.forEach((a) => {
-            const key = a.title;
-            if (!seen.has(key)) {
-              seen.add(key);
-              out.push(a);
-            }
-          });
-
-          // then add resume achievements
-          (resumeData.achievements || []).forEach((a: any) => {
-            const key = a.title;
-            if (!seen.has(key)) {
-              seen.add(key);
-              out.push(a);
-            }
-          });
-
-          return out;
-        })();
-
-        const suggestedClass: string = resumeData.suggestedClass || currentProfile.className;
-
-        // Update base profile fields to reflect resume
-        currentProfile = {
-          ...currentProfile,
-          className: suggestedClass,
-          specialization: currentProfile.specialization || resumeData.education || 'Generalist',
-          achievements: mergedAchievements,
-          skillTree: mergedSkills.slice(0, 18),
-          analysis: {
-            ...currentProfile.analysis,
-            powerLevel: currentProfile.analysis?.powerLevel || `${currentProfile.powerLevel}/100`,
-          },
-        };
-      }
+      currentProfile = await response.json();
 
       setProfile(currentProfile);
       setIsLoaded(true);
-      setSuccessMessage(
-        usernameInput.trim()
-          ? `Generated RPG profile for ${currentProfile.name}!`
-          : `Generated RPG profile from your resume!`,
-      );
+      setSuccessMessage(`Generated RPG profile for ${currentProfile.name}!`);
 
       // README tab is more likely desired right after generation
       setActiveTab('readme');
@@ -293,7 +201,7 @@ function App() {
                 Developer RPG Profile Generator
               </h1>
               <p className="subtle" style={{ fontSize: '0.88rem', lineHeight: 1.4 }}>
-                Transform your GitHub activity and technical resume into an RPG character dashboard and download a custom profile README.md.
+                Transform your GitHub activity into an RPG character dashboard and download a custom profile README.md.
               </p>
             </div>
 
@@ -322,93 +230,6 @@ function App() {
                   style={{ height: '38px', padding: '0 12px' }}
                   aria-label="GitHub Username"
                 />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                    📄 Upload Resume (PDF/DOCX)
-                  </label>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    Optional
-                  </span>
-                </div>
-
-                <div
-                  className="file-dropzone"
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      const el = document.getElementById('resume-upload-input') as HTMLInputElement | null;
-                      el?.click();
-                    }
-                  }}
-                  onClick={() => {
-                    const el = document.getElementById('resume-upload-input') as HTMLInputElement | null;
-                    el?.click();
-                  }}
-                  aria-label="Upload resume"
-                >
-                  <div className="upload-icon">⬆️</div>
-                  <div style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: 4 }}>
-                    Choose file
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                    Drop a PDF or DOCX to extract skills & experience
-                  </div>
-
-                  <input
-                    id="resume-upload-input"
-                    type="file"
-                    accept=".pdf,.docx"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] ?? null;
-                      setResumeFile(file);
-                    }}
-                    aria-label="Upload Resume"
-                  />
-                </div>
-
-                {resumeFile && (
-                  <div
-                    style={{
-                      fontSize: '0.78rem',
-                      color: 'var(--text-muted)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      padding: '10px 12px',
-                      border: '1px solid var(--line-strong)',
-                      borderRadius: 6,
-                      backgroundColor: 'var(--bg-deep)',
-                    }}
-                  >
-                    <span>
-                      Selected: <strong style={{ color: 'var(--text-main)' }}>{resumeFile.name}</strong>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setResumeFile(null);
-                      }}
-                      style={{
-                        border: '1px solid var(--line-strong)',
-                        background: 'transparent',
-                        color: 'var(--text-main)',
-                        borderRadius: 6,
-                        padding: '6px 10px',
-                        cursor: 'pointer',
-                        fontWeight: 700,
-                        fontSize: '0.78rem',
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
               </div>
 
 
