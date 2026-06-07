@@ -1,14 +1,31 @@
 # Developer RPG Profile Generator
 
-An interactive, gaming-inspired profile generator and dashboard that transforms a developer's GitHub identity and uploaded resume details into an RPG-style character sheet, calculates a "Power Level" score, and exports a custom-themed `README.md` for their GitHub profile.
+Generate an RPG-style character sheet from a GitHub profile (and optionally a resume), then export a themed `README.md` you can paste into your GitHub profile.
+
+- **GitHub stats → RPG stats** (commits, merged PRs, stars, streak)
+- **Power Level (0–100) + rank**
+- **Skill Tree + Quest Log**
+- **README exporter** (copy / download)
+
 
 Built with **React 19**, **TypeScript 6**, **Vite 8**, **Node.js Serverless Functions**, and **Vanilla CSS** with a custom neobrutalist/cyberpunk design system.
+
+---
+
+## 🎮 How it works (quick, for humans)
+
+1. Open the app and enter a **GitHub username** (public mode) or sign in with GitHub (OAuth).
+2. The backend fetches your GitHub profile, repositories, commit/PR counts, and contribution activity.
+3. The app converts those metrics into RPG-style stats: **class, rank, power level**, a **skill tree**, and a **quest log**.
+4. (Optional) Upload your resume (PDF/DOCX). We extract skill keywords and upgrade your skill tree + achievements.
+5. Go to **README Generator** and export a themed `README.md` for your GitHub profile (copy or download).
 
 ---
 
 ## 🎮 Features & Gameplay
 
 1. **GitHub OAuth Login & Public Search**
+
    - Click "Sign in with GitHub" to securely exchange authentication codes for an access token via `/api/github`.
    - Fetches profile info, repositories, commit counts, and merged pull request totals.
    - Parses the active event stream to calculate a real contribution streak.
@@ -84,7 +101,8 @@ Built with **React 19**, **TypeScript 6**, **Vite 8**, **Node.js Serverless Func
 - **nvm** (Optional): Used to switch node environments.
 
 ### 2. Environment Configuration
-Create a `.env` or `.env.local` file at the root based on the template in [`.env.example`](file:///Users/nandini/Downloads/analysis/analysis/.env.example):
+Create a `.env` or `.env.local` file at the root based on [`.env.example`](./.env.example):
+
 ```bash
 # Register a GitHub OAuth App to obtain client keys:
 # Homepage URL = http://localhost:5173
@@ -99,37 +117,38 @@ GITHUB_TOKEN=your_personal_access_token_here
 ### 3. Execution Commands
 Run these commands from the root directory:
 
-- **Start Unified Dev Server**:
+- **Start Dev Server**
   ```bash
   npm run dev
   ```
-  Launches the Vite server hosting frontend assets and proxies `/api/*` endpoints in-process. Runs on port `5173`.
-  
-- **Typecheck & Compile Production Bundle**:
+  Starts Vite on **http://localhost:5173** and serves the SPA + local `/api/*` routes.
+
+- **Build (production bundle)**
   ```bash
   npm run build
   ```
-  Validates TypeScript types (`tsc -b`) and bundles files inside the `dist/` directory.
+  Runs `tsc -b` then builds the app into `dist/`.
 
-- **Check Code Quality**:
+- **Lint**
   ```bash
   npm run lint
   ```
-  Executes ESLint parser checks to guarantee conforming styles.
 
-- **Preview Production Assets Locally**:
+- **Preview production build**
   ```bash
   npm run preview
   ```
-  Launches a local webserver pointing to build outputs.
+
 
 ---
 
 ## 🚀 Deployment to Vercel
 
-The project is structured to deploy to Vercel without requiring complex configuration:
+1. Connect the repo in your Vercel dashboard.
+2. Vercel builds the React SPA and deploys the `/api/*` serverless handlers.
+3. Add env vars in **Vercel → Project Settings → Environment Variables**:
+   - `VITE_GITHUB_CLIENT_ID`
+   - `GITHUB_CLIENT_SECRET`
+   - `GITHUB_TOKEN` (optional but recommended to reduce rate limits)
+4. Deploy.
 
-1. **Connect Repository**: Import the repository in your Vercel Dashboard.
-2. **Automatic Detection**: Vercel automatically detects the Vite setup for front-end assets and compiles the `/api` directory into Serverless Functions.
-3. **Environment Variables**: Make sure to add `VITE_GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `GITHUB_TOKEN` under your Project Settings -> Environment Variables tab in Vercel.
-4. **Deploy**: Click deploy. Vercel will host both the React SPA and the API functions together.
