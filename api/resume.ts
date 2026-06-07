@@ -1,8 +1,8 @@
 /* eslint-disable */
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+import * as pdfParseModule from 'pdf-parse';
 
+// Handle CJS/ESM interop for both Vite SSR and Vercel Node runtimes
+const pdfParse: any = ('default' in pdfParseModule ? pdfParseModule.default : pdfParseModule);
 
 
 import mammoth from 'mammoth';
