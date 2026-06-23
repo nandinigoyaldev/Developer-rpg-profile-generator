@@ -1,3 +1,9 @@
+export type SkillNode = {
+  name: string;
+  level: number;
+  branch: string;
+};
+
 export type RepositoryQuest = {
   name: string;
   stars: number;
@@ -28,4 +34,5 @@ export type DeveloperProfile = {
   pinnedTrash: RepositoryQuest[];
   toxicTraits: string[];
   activityRoast: string;
+  skills?: SkillNode[];
 };

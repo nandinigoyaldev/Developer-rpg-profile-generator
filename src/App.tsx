@@ -3,16 +3,20 @@ import { SidebarProfile } from './components/SidebarProfile';
 import { PinnedTrash } from './components/PinnedTrash';
 import { ToxicTraits } from './components/ToxicTraits';
 import { ContributionGraph } from './components/ContributionGraph';
+import { SkillRadarChart } from './components/SkillRadarChart';
 import { ProfileCompletionTracker } from './components/ProfileCompletionTracker';
+import { BadgeGenerator } from './components/BadgeGenerator';
 import { ReadmePanel } from './components/ReadmePanel';
 import { RepoAnalyzerPanel } from './components/RepoAnalyzerPanel';
 import { ProfileJudgePanel } from './components/ProfileJudgePanel';
+import { PvPBattlePanel } from './components/PvPBattlePanel';
+import { GithubWrappedPanel } from './components/GithubWrappedPanel';
 import { characterProfile } from './data/character';
 import type { DeveloperProfile } from './types/profile';
 
 function App() {
   const [profile, setProfile] = useState<DeveloperProfile | any>(characterProfile);
-  const [activeTab, setActiveTab] = useState<'overview' | 'readme' | 'repo' | 'judge'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'readme' | 'repo' | 'judge' | 'pvp' | 'wrapped'>('overview');
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -221,15 +225,29 @@ function App() {
                   >
                     Profile Judge
                   </button>
+                  <button
+                    style={{ background: 'none', border: 'none', padding: '8px 16px', color: activeTab === 'pvp' ? 'var(--text-main)' : 'var(--text-muted)', borderBottom: activeTab === 'pvp' ? '2px solid var(--git-orange)' : '2px solid transparent', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
+                    onClick={() => setActiveTab('pvp')}
+                  >
+                    PvP Battle
+                  </button>
+                  <button
+                    style={{ background: 'none', border: 'none', padding: '8px 16px', color: activeTab === 'wrapped' ? 'var(--text-main)' : 'var(--text-muted)', borderBottom: activeTab === 'wrapped' ? '2px solid var(--git-orange)' : '2px solid transparent', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
+                    onClick={() => setActiveTab('wrapped')}
+                  >
+                    GitHub Wrapped
+                  </button>
                 </div>
 
                 {/* TAB 1: OVERVIEW */}
                 {activeTab === 'overview' && (
                   <div>
+                    <SkillRadarChart profile={profile} />
                     <PinnedTrash repositories={profile.pinnedTrash || []} />
                     <ContributionGraph totalCommits={profile.totalCommits || 0} streak={profile.streak || 0} roast={profile.activityRoast || ''} />
                     <ToxicTraits traits={profile.toxicTraits || []} />
                     <ProfileCompletionTracker profile={profile} />
+                    <BadgeGenerator profile={profile} />
                   </div>
                 )}
 
@@ -246,6 +264,16 @@ function App() {
                 {/* TAB 4: PROFILE JUDGE */}
                 {activeTab === 'judge' && (
                   <ProfileJudgePanel profile={profile} />
+                )}
+
+                {/* TAB 5: PVP BATTLE */}
+                {activeTab === 'pvp' && (
+                  <PvPBattlePanel />
+                )}
+
+                {/* TAB 6: GITHUB WRAPPED */}
+                {activeTab === 'wrapped' && (
+                  <GithubWrappedPanel profile={profile} />
                 )}
 
               </div>

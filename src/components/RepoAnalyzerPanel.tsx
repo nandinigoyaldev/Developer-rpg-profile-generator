@@ -139,6 +139,19 @@ export function RepoAnalyzerPanel() {
               </ul>
             </div>
           )}
+
+          <div className="card" style={{ padding: '24px', backgroundColor: '#1a0b2e', border: '1px solid #6b21a8', borderRadius: '6px', textAlign: 'center', marginTop: '16px' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#c084fc', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              🔮 The Fortune Teller Predicts...
+            </h3>
+            <p style={{ fontSize: '1.05rem', color: '#e9d5ff', fontStyle: 'italic', margin: 0 }}>
+              {repoData.issues > 10 ? "I see... an endless backlog of issues that will haunt you until you eventually archive the repository." :
+               repoData.stars === 0 ? "I see... a project that will remain forever undiscovered, like a forgotten tomb." :
+               repoData.isLive ? "I see... a deployed project! Someone might actually use it. Might. If you get lucky." :
+               repoData.language === 'HTML' ? "I see... you switching to React in 3 years and wondering why you ever used plain HTML." :
+               "I see... you rewriting this entire project in Rust next year, and failing."}
+            </p>
+          </div>
         </div>
       )}
     </div>
