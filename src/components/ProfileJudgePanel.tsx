@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { DeveloperProfile } from '../types/profile';
+import { useMemo } from 'react';
+import type { DeveloperProfile } from '../types/profile';
 import { judgeProfile } from '../lib/profileJudge';
 
 interface ProfileJudgePanelProps {

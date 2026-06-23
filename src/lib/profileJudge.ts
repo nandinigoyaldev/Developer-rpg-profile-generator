@@ -1,4 +1,4 @@
-import { DeveloperProfile } from '../types/profile';
+import type { DeveloperProfile } from '../types/profile';
 
 export function judgeProfile(profile: DeveloperProfile): { roasts: string[], tips: string[] } {
   const roasts: string[] = [];

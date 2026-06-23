@@ -3,6 +3,7 @@ import { SidebarProfile } from './components/SidebarProfile';
 import { PinnedTrash } from './components/PinnedTrash';
 import { ToxicTraits } from './components/ToxicTraits';
 import { ContributionGraph } from './components/ContributionGraph';
+import { ProfileCompletionTracker } from './components/ProfileCompletionTracker';
 import { ReadmePanel } from './components/ReadmePanel';
 import { RepoAnalyzerPanel } from './components/RepoAnalyzerPanel';
 import { ProfileJudgePanel } from './components/ProfileJudgePanel';
@@ -228,6 +229,7 @@ function App() {
                     <PinnedTrash repositories={profile.pinnedTrash || []} />
                     <ContributionGraph totalCommits={profile.totalCommits || 0} streak={profile.streak || 0} roast={profile.activityRoast || ''} />
                     <ToxicTraits traits={profile.toxicTraits || []} />
+                    <ProfileCompletionTracker profile={profile} />
                   </div>
                 )}
 
