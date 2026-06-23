@@ -1,17 +1,17 @@
 <div align="center">
   
-  <h1>Developer RPG Profile Generator</h1>
+  <h1>Developer Roasting Profile Generator</h1>
   
   <p>
-    Turn your GitHub profile into an RPG-style character sheet,
-    then export a themed <code>README.md</code> you can paste into your GitHub profile.
+    Turn your GitHub profile into a hilariously toxic roasting session,
+    then export a brutal <code>README.md</code> you can paste into your GitHub profile.
   </p>
 
   <p>
-    <strong>GitHub stats → RPG stats</strong> (commits, merged PRs, stars, streak) •
-    <strong>Power Level (0–100)</strong> + rank •
-    <strong>Skill Tree</strong> + <strong>Quest Log</strong> •
-    <strong>README exporter</strong> + <strong>Repo Analyzer</strong>
+    <strong>GitHub stats → Brutal Roasts</strong> (commits, merged PRs, stars, streak) •
+    <strong>Toxic Traits Analyzer</strong> •
+    <strong>Contribution Graph of Shame</strong> •
+    <strong>README exporter</strong>
   </p>
 
   <br />

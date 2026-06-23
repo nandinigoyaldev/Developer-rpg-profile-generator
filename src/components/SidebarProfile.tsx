@@ -10,7 +10,7 @@ export function SidebarProfile({ profile }: SidebarProfileProps) {
       <img 
         src={profile.avatarUrl || `https://github.com/${profile.login}.png`} 
         alt={profile.login} 
-        style={{ width: '296px', height: '296px', borderRadius: '50%', border: '1px solid var(--line-strong)', marginBottom: '16px' }}
+        style={{ width: '296px', height: '296px', borderRadius: '50%', border: '1px solid var(--line-strong)', marginBottom: '16px', objectFit: 'cover' }}
       />
       <h1 style={{ marginBottom: '16px' }}>
         <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.25 }}>{profile.name}</div>
