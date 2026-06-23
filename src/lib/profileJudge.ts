@@ -1,55 +1,57 @@
 import type { DeveloperProfile } from '../types/profile';
 
-export function judgeProfile(profile: DeveloperProfile): { roasts: string[], tips: string[] } {
-  const roasts: string[] = [];
+export function judgeProfile(profile: DeveloperProfile): { tips: string[] } {
   const tips: string[] = [];
 
   // Evaluate Bio
   if (!profile.bio) {
-    roasts.push("No bio. Are you a ghost, or just too lazy to type one sentence about yourself?");
-    tips.push("Add a bio! Even a simple 'I write code sometimes' is better than an empty void. It helps people know you exist.");
-  } else if (profile.bio.toLowerCase().includes('enthusiast')) {
-    roasts.push("Ah, an 'enthusiast'. That's just a polite way of saying you watched one YouTube tutorial and put it in your bio.");
-    tips.push("Try being more specific in your bio about what you actually build or work on instead of using vague buzzwords.");
+    tips.push("You look like a ghost online. Add a bio! Even a simple 'I write code sometimes' is better than this empty void.");
+  } else {
+    const bioLen = profile.bio.length;
+    if (bioLen < 15) {
+      tips.push(`Your bio is "${profile.bio}". Wow, so mysterious. Try expanding it so people know what you actually build.`);
+    } else if (profile.bio.toLowerCase().includes('enthusiast')) {
+      tips.push("Ah, an 'enthusiast'. Stop using vague buzzwords and tell people what technologies you actually write code in.");
+    }
+  }
+
+  // Evaluate Avatar
+  if (!profile.avatarUrl || profile.avatarUrl.includes('gravatar') || profile.avatarUrl.includes('default')) {
+    tips.push("You don't even have a real profile picture. Upload something so people don't think you're a bot.");
   }
 
   // Evaluate Location
   if (!profile.location) {
-    roasts.push("No location set. Where do you live? In the node_modules folder?");
-    tips.push("Set your location. It helps with networking and lets recruiters know what timezone you're ignoring them from.");
+    tips.push("You have no location set. Do you live in the node_modules folder? Add a location to help with networking.");
   }
 
   // Evaluate Activity
-  if (profile.totalCommits < 50) {
-    roasts.push(`Only ${profile.totalCommits} commits in the last year? Do you type with your elbows?`);
-    tips.push("Try to commit more regularly. Break your work into smaller, logical commits instead of pushing everything once a month.");
-  } else if (profile.totalCommits > 2000) {
-    roasts.push(`${profile.totalCommits} commits. Have you heard of 'squashing' or do you just commit every time you add a semicolon?`);
-    tips.push("High activity is great, but ensure your commits are meaningful. Consider squashing minor typos and formatting changes.");
+  if (profile.totalCommits === 0) {
+    tips.push("0 commits. Are you sure you're a developer? Push some code before asking anyone to look at your profile.");
+  } else if (profile.totalCommits < 50) {
+    tips.push(`Only ${profile.totalCommits} commits this year? Try to commit more regularly instead of pushing everything once a month.`);
   }
 
   // Evaluate Repos
-  if (profile.pinnedTrash && profile.pinnedTrash.length === 0) {
-    roasts.push("No pinned repositories. Either you have nothing to show, or everything you have is too embarrassing to pin.");
-    tips.push("Pin your best up to 6 repositories on your GitHub profile. It's the first thing people see.");
-  } else if (profile.pinnedTrash && profile.pinnedTrash.every(repo => repo.stars === 0)) {
-    roasts.push("None of your pinned repos have stars. Maybe try writing something useful?");
-    tips.push("Promote your open source work. Add good READMEs to your pinned projects to help people understand and star them.");
+  if (!profile.pinnedTrash || profile.pinnedTrash.length === 0) {
+    tips.push("You have no pinned repositories. Either you have nothing to show, or everything is too embarrassing. Pin your best projects!");
+  } else {
+    const totalStars = profile.pinnedTrash.reduce((acc, r) => acc + r.stars, 0);
+    if (totalStars === 0) {
+      tips.push("None of your pinned repos have stars. Add good READMEs so people actually know what they do.");
+    }
   }
 
   // Evaluate Social
   if (profile.followers === 0) {
-    roasts.push("0 followers. Not even your alt accounts follow you.");
-    tips.push("Engage with the community! Contribute to open source, open useful issues, or just participate in discussions.");
+    tips.push("0 followers. Not even your alt accounts follow you. Try contributing to open source or opening useful issues.");
   }
 
-  // Fallback if somehow they are perfect (unlikely)
-  if (roasts.length === 0) {
-    roasts.push("Your profile is so average that I couldn't even find anything to roast. How boring.");
-  }
+  // Fallback if somehow they are perfect
   if (tips.length === 0) {
-    tips.push("Keep doing what you're doing, I guess. You're doing okay.");
+    tips.push("Your profile is weirdly decent. Maybe try writing a blog post so I have something to critique.");
   }
 
-  return { roasts, tips };
+  // Return at most 2 tips for impact
+  return { tips: tips.slice(0, 2) };
 }

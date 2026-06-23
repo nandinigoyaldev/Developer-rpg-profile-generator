@@ -6,7 +6,8 @@ export function PvPBattlePanel() {
   const [player2, setPlayer2] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [battleResult, setBattleResult] = useState<{ p1: DeveloperProfile, p2: DeveloperProfile, winner: number, roast: string } | null>(null);
+  const [battleState, setBattleState] = useState<'idle' | 'fighting' | 'finished'>('idle');
+  const [battleResult, setBattleResult] = useState<{ p1: DeveloperProfile, p2: DeveloperProfile, winner: number, roast: string, hp1: number, hp2: number } | null>(null);
 
   const handleBattle = async () => {
     if (!player1.trim() || !player2.trim()) {
@@ -38,22 +39,46 @@ export function PvPBattlePanel() {
       let winner = 0;
       let roast = '';
 
+      let hp1 = 100;
+      let hp2 = 100;
+
       if (score1 > score2) {
         winner = 1;
+        hp2 = Math.max(0, 100 - (score1 - score2));
         roast = `${p1.name || p1.login} completely obliterated ${p2.name || p2.login}. Maybe ${p2.login} should try touching a keyboard once in a while.`;
       } else if (score2 > score1) {
         winner = 2;
+        hp1 = Math.max(0, 100 - (score2 - score1));
         roast = `${p2.name || p2.login} destroyed ${p1.name || p1.login}. ${p1.login} was probably too busy centering divs to write real code.`;
       } else {
+        hp1 = 10; hp2 = 10;
         roast = `It's a tie! You both write equally mediocre code. Congratulations.`;
       }
 
-      setBattleResult({ p1, p2, winner, roast });
+      setBattleResult({ p1, p2, winner, roast, hp1, hp2 });
+      setBattleState('fighting');
+
+      // Fake battle duration for animation
+      setTimeout(() => {
+        setBattleState('finished');
+      }, 3000);
+
     } catch (err: any) {
       setError(err.message);
-    } finally {
+      setBattleState('idle');
       setLoading(false);
     }
+  };
+
+  const handleShare = () => {
+    if (!battleResult) return;
+    const text = battleResult.winner === 1 
+      ? `I just destroyed ${battleResult.p2.login} in a Developer Roast Battle! ${battleResult.p1.login} reigns supreme. ⚔️ \n\nCheck your stats at Developer RPG!`
+      : battleResult.winner === 2
+      ? `${battleResult.p2.login} just humiliated me in a Developer Roast Battle. I'm going back to tutorials. ⚔️ \n\nCheck your stats at Developer RPG!`
+      : `I tied with ${battleResult.p2.login} in a Developer Roast Battle. We both suck. ⚔️ \n\nCheck your stats at Developer RPG!`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -99,23 +124,33 @@ export function PvPBattlePanel() {
         </div>
       )}
 
-      {battleResult && (
+      {battleResult && battleState !== 'idle' && (
         <div style={{ animation: 'fadeIn 0.5s ease-in-out' }}>
-          <div style={{ padding: '24px', backgroundColor: 'rgba(210, 153, 34, 0.1)', border: '1px solid var(--git-orange)', borderRadius: '6px', textAlign: 'center', marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '1.5rem', color: 'var(--git-orange)', margin: '0 0 12px 0' }}>The Verdict</h3>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-main)', margin: 0 }}>"{battleResult.roast}"</p>
-          </div>
+          
+          {battleState === 'finished' && (
+            <div style={{ padding: '24px', backgroundColor: 'rgba(210, 153, 34, 0.1)', border: '1px solid var(--git-orange)', borderRadius: '6px', textAlign: 'center', marginBottom: '24px', animation: 'bounce 0.5s' }}>
+              <h3 style={{ fontSize: '1.5rem', color: 'var(--git-orange)', margin: '0 0 12px 0', textTransform: 'uppercase' }}>K.O.</h3>
+              <p style={{ fontSize: '1.1rem', color: 'var(--text-main)', margin: '0 0 16px 0' }}>"{battleResult.roast}"</p>
+              <button 
+                onClick={handleShare}
+                style={{ background: '#1DA1F2', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '24px', cursor: 'pointer', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              >
+                🐦 Share to Twitter/X
+              </button>
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '24px' }}>
             {/* Player 1 Stats */}
-            <div className="card" style={{ flex: 1, padding: '16px', border: battleResult.winner === 1 ? '2px solid var(--git-green)' : '1px solid var(--line-strong)', opacity: battleResult.winner === 2 ? 0.6 : 1 }}>
+            <div className="card" style={{ flex: 1, padding: '16px', border: battleState === 'finished' && battleResult.winner === 1 ? '2px solid var(--git-green)' : '1px solid var(--line-strong)', opacity: battleState === 'finished' && battleResult.winner === 2 ? 0.6 : 1, transition: 'all 0.5s ease' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <img src={battleResult.p1.avatarUrl} alt="P1" style={{ width: '48px', height: '48px', borderRadius: '50%' }} />
-                <div>
-                  <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{battleResult.p1.login}</h4>
-                  <span style={{ fontSize: '0.8rem', color: battleResult.winner === 1 ? 'var(--git-green)' : 'var(--git-red)', fontWeight: 600 }}>
-                    {battleResult.winner === 1 ? 'WINNER' : battleResult.winner === 2 ? 'LOSER' : 'TIE'}
-                  </span>
+                <img src={battleResult.p1.avatarUrl} alt="P1" style={{ width: '48px', height: '48px', borderRadius: '50%', animation: battleState === 'fighting' ? 'shake 0.5s infinite' : 'none' }} />
+                <div style={{ width: '100%' }}>
+                  <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-main)' }}>{battleResult.p1.login}</h4>
+                  {/* Health Bar */}
+                  <div style={{ width: '100%', height: '12px', background: '#30363d', borderRadius: '6px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: battleState === 'fighting' ? '100%' : `${battleResult.hp1}%`, background: battleResult.hp1 > 20 ? 'var(--git-green)' : 'var(--git-red)', transition: 'width 2s ease-out' }}></div>
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -126,14 +161,15 @@ export function PvPBattlePanel() {
             </div>
 
             {/* Player 2 Stats */}
-            <div className="card" style={{ flex: 1, padding: '16px', border: battleResult.winner === 2 ? '2px solid var(--git-green)' : '1px solid var(--line-strong)', opacity: battleResult.winner === 1 ? 0.6 : 1 }}>
+            <div className="card" style={{ flex: 1, padding: '16px', border: battleState === 'finished' && battleResult.winner === 2 ? '2px solid var(--git-green)' : '1px solid var(--line-strong)', opacity: battleState === 'finished' && battleResult.winner === 1 ? 0.6 : 1, transition: 'all 0.5s ease' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <img src={battleResult.p2.avatarUrl} alt="P2" style={{ width: '48px', height: '48px', borderRadius: '50%' }} />
-                <div>
-                  <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{battleResult.p2.login}</h4>
-                  <span style={{ fontSize: '0.8rem', color: battleResult.winner === 2 ? 'var(--git-green)' : 'var(--git-red)', fontWeight: 600 }}>
-                    {battleResult.winner === 2 ? 'WINNER' : battleResult.winner === 1 ? 'LOSER' : 'TIE'}
-                  </span>
+                <img src={battleResult.p2.avatarUrl} alt="P2" style={{ width: '48px', height: '48px', borderRadius: '50%', animation: battleState === 'fighting' ? 'shake 0.5s infinite reverse' : 'none' }} />
+                <div style={{ width: '100%' }}>
+                  <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-main)', textAlign: 'right' }}>{battleResult.p2.login}</h4>
+                  {/* Health Bar */}
+                  <div style={{ width: '100%', height: '12px', background: '#30363d', borderRadius: '6px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: battleState === 'fighting' ? '100%' : `${battleResult.hp2}%`, background: battleResult.hp2 > 20 ? 'var(--git-green)' : 'var(--git-red)', transition: 'width 2s ease-out', float: 'right' }}></div>
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>

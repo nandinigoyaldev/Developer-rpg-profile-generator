@@ -48,12 +48,60 @@ export function GithubWrappedPanel({ profile }: { profile: DeveloperProfile }) {
     }
   ];
 
+  const playSound = (type: 'beep' | 'levelUp') => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContext();
+      
+      if (type === 'beep') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+      } else if (type === 'levelUp') {
+        // Play an arpeggio
+        const notes = [440, 554, 659, 880];
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.1);
+          osc.stop(ctx.currentTime + i * 0.1 + 0.2);
+        });
+      }
+    } catch (e) {
+      console.warn('Audio not supported or blocked');
+    }
+  };
+
   const nextSlide = () => {
-    if (currentSlide < slides.length - 1) setCurrentSlide(curr => curr + 1);
+    if (currentSlide < slides.length - 1) {
+      setCurrentSlide(curr => curr + 1);
+      if (currentSlide + 1 === slides.length - 1) {
+        playSound('levelUp');
+      } else {
+        playSound('beep');
+      }
+    }
   };
 
   const prevSlide = () => {
-    if (currentSlide > 0) setCurrentSlide(curr => curr - 1);
+    if (currentSlide > 0) {
+      setCurrentSlide(curr => curr - 1);
+      playSound('beep');
+    }
   };
 
   const slide = slides[currentSlide];
