@@ -110,12 +110,12 @@ const GIF_STICKERS = {
 };
 
 const RPG_QUOTES = [
-  "\"Talk is cheap. Show me the code.\" — Linus Torvalds",
-  "\"The only way to go fast, is to go well.\" — Robert C. Martin",
-  "\"It's dangerous to go alone! Take this compile script.\" — The Old Hermit",
-  "\"Every bug is just a hidden quest waiting to be unlocked.\" — Guild Master",
-  "\"Make it work, make it right, make it fast.\" — Kent Beck",
-  "\"Programs must be written for people to read, and only incidentally for machines to execute.\" — Abelson & Sussman"
+  "\"It works on my machine.\" — The Developer's Prayer",
+  "\"I'll document this later.\" — A Lie Everyone Believes",
+  "\"Why do we even have a QA team?\" — Developer who just broke production",
+  "\"Copy, Paste, Pray.\" — The holy trinity of modern programming",
+  "\"It's not a bug, it's an undocumented feature nobody asked for.\"",
+  "\"Weeks of coding can save you hours of planning.\""
 ];
 
 // Helper to generate custom progress bars
@@ -358,13 +358,13 @@ Core Constraints:
       
       let prose = '';
       if (toneType === 0) {
-        prose = `A wild \`${profile.className}\` appeared! Emerging from the deep coding dungeons of the \`${profile.guild}\` guild, I specialize in the arcane arts of \`${profile.specialization}\`. Armed with standard compilation scrolls and bug-slaying runes, my current tier is \`${profile.rank}\` with an overall power level of \`${profile.powerLevel}\`! Let's clear some quests together. ⚔️`;
+        prose = `A wild \`${profile.className}\` appeared! Escaping from the depths of the \`${profile.guild}\` basement, I pretend to know the arcane arts of \`${profile.specialization}\`. Armed with copy-pasted StackOverflow code, my current tier is \`${profile.rank}\` with an embarrassing power level of \`${profile.powerLevel}\`! Let's ignore some bugs together. 🤡`;
       } else if (toneType === 1) {
-        prose = `I am \`${profile.name}\`, a professional engineer specialized in \`${profile.specialization}\`. Affiliated with the \`${profile.guild}\` ecosystem, I work as a \`${profile.className}\`. Holding the active designation of \`${profile.rank}\`, my focus is on performance optimization, clean architectures, and high-completeness contribution systems.`;
+        prose = `I am \`${profile.name}\`, a so-called "professional" who writes \`${profile.specialization}\` code. Currently hiding out at \`${profile.guild}\` as a \`${profile.className}\`. My designation is \`${profile.rank}\`, which means I spend more time deciding on variable names than actually building features.`;
       } else if (toneType === 2) {
-        prose = `System Initialized. Interface name: \`${profile.name}\`. Guild Node: \`${profile.guild}\`. Operating Specialization: \`${profile.specialization}\`. Operating Class: \`${profile.className}\`. Status: Online. Security clearance level: \`${profile.rank}\`. Core potency factor: \`${profile.powerLevel}\`. Connection to grid is nominal.`;
+        prose = `System Initialized. Interface: \`${profile.name}\`. Corporate Overlords: \`${profile.guild}\`. Preferred Method of Breaking Production: \`${profile.specialization}\`. Disguise: \`${profile.className}\`. Status: Pretending to work. Threat Level: \`${profile.rank}\`. Core incompetence: \`${profile.powerLevel}\`.`;
       } else {
-        prose = `Hi, I'm \`${profile.name}\`! 🌸 Soft developer and proud member of the lovely \`${profile.guild}\` guild! As a sweet \`${profile.className}\`, I spend my days building cozy wonders with \`${profile.specialization}\`! (* ^ ω ^) Level \`${profile.rank}\` with a magic power level of \`${profile.powerLevel}\`! ✨ Let's be friends!`;
+        prose = `Hi, I'm \`${profile.name}\`! 🌸 I am currently gracing \`${profile.guild}\` with my presence! As a \`${profile.className}\`, I spend my days writing messy \`${profile.specialization}\` code! (* ^ ω ^) I'm a proud \`${profile.rank}\` with a magic power level of \`${profile.powerLevel}\`! ✨ Pls don't review my PRs too closely!`;
       }
 
       if (type === 0) {
@@ -381,7 +381,7 @@ Core Constraints:
         return `## 👤 Character Properties\n\`\`\`json\n${JSON.stringify(jsonAbout, null, 2)}\n\`\`\`\n\n`;
       } else if (type === 1) {
         // Bullet list attributes
-        return `## 👤 Character Sheet\n- 🛡️ **BattleTag**: \`${profile.battleTag}\`\n- ⚔️ **Class Spec**: \`${profile.className} (${profile.specialization})\`\n- 🏰 **Guild / Faction**: \`${profile.guild}\`\n- 🎖️ **Combat Rank**: \`${profile.rank}\`\n- ⚡ **Power Factor**: \`${profile.powerLevel}/100\`\n\n`;
+        return `## 👤 Warning Label\n- 🛡️ **Alias**: \`${profile.battleTag}\`\n- ⚔️ **Fraud Spec**: \`${profile.className} (${profile.specialization})\`\n- 🏰 **Current Victim (Employer)**: \`${profile.guild}\`\n- 🎖️ **Incompetence Rank**: \`${profile.rank}\`\n- ⚡ **Chaos Factor**: \`${profile.powerLevel}/100\`\n\n`;
       } else if (type === 2) {
         // Prose paragraph
         return `## 📜 Lore & Origins\n${prose}\n\n`;
@@ -433,7 +433,7 @@ Core Constraints:
           return `| \`${repo.name}\` | **${repo.questType}** | \`${repo.difficulty}\` | ⭐ ${repo.stars} | ${statusIcon} **${repo.status}** |`;
         }).join('\n');
 
-        return `## 🗺️ Quest Log (Repositories)\n| 🗺️ Quest Name | 💎 Quest Type | ⚔️ Difficulty | 🏆 Reward (Fame) | 🚦 Quest Status |\n| :--- | :--- | :--- | :--- | :--- |\n${rows}\n\n`;
+        return `## 🗺️ Repo Graveyard (Abandoned Projects)\n| 🗺️ Trash Name | 💎 Excuse Type | ⚔️ Spaghetti Level | 🏆 Pity Stars | 🚦 Abandonment Status |\n| :--- | :--- | :--- | :--- | :--- |\n${rows}\n\n`;
       } else if (type === 1) {
         // Timeline List
         const timeline = profile.repositories.map((repo: any) => {
@@ -529,9 +529,9 @@ Core Constraints:
       if (type === 0) {
         text = `> ${quote}\n\n<div align="center"><sub>${cfg.footerText}</sub></div>\n`;
       } else if (type === 1) {
-        text = `### 🤝 Join the Party\n- ⚔️ **Looking for a party member?** Let's collaborate on epic repos!\n- ✉️ Reach out on socials or open a Quest Issue in my repositories.\n\n<div align="center"><sub>${cfg.footerText}</sub></div>\n`;
+        text = `### 🤝 Begging for Collaborators\n- ⚔️ **Desperate for a team?** Please help me fix my code!\n- ✉️ Reach out on socials, I have no friends.\n\n<div align="center"><sub>${cfg.footerText}</sub></div>\n`;
       } else {
-        text = `### 🏆 Milestones Unlocked\n${profile.achievements.slice(0, 2).map((a: any) => `- **${a.title}** (${a.tier}): _${a.detail}_`).join('\n')}\n\n<div align="center"><sub>${cfg.footerText}</sub></div>\n`;
+        text = `### 🏆 "Milestones" (Barely)\n${profile.achievements.slice(0, 2).map((a: any) => `- **${a.title}** (${a.tier}): _${a.detail}_`).join('\n')}\n\n<div align="center"><sub>${cfg.footerText}</sub></div>\n`;
       }
 
       return text;

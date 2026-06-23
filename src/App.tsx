@@ -195,12 +195,12 @@ function App() {
           <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '24px', border: '1px solid var(--line-strong)', borderRadius: '6px', backgroundColor: 'var(--bg-panel)', boxShadow: 'var(--shadow-neon)' }}>
             
             <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '8px' }}>⚔️</div>
+              <div style={{ fontSize: '3rem', marginBottom: '8px' }}>🤡</div>
               <h1 style={{ fontSize: '1.62rem', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text-main)' }}>
-                Developer RPG Profile Generator
+                Developer Roasting Profile Generator
               </h1>
               <p className="subtle" style={{ fontSize: '0.88rem', lineHeight: 1.4 }}>
-                Transform your GitHub activity into an RPG character dashboard and download a custom profile README.md.
+                Let us brutally roast your GitHub activity and generate a sarcastic RPG profile and README.
               </p>
             </div>
 
@@ -213,7 +213,7 @@ function App() {
             {loading && (
               <div className="card loading-overlay" style={{ marginBottom: '16px' }}>
                 <div className="spinner"></div>
-                <span style={{ fontSize: '0.85rem' }}>Deciphering developer profiles...</span>
+                <span style={{ fontSize: '0.85rem' }}>Judging your terrible code...</span>
               </div>
             )}
 
@@ -271,8 +271,8 @@ function App() {
             {/* Desktop tabs */}
             <div className="github-tabs-container desktop-tabs">
               {[
-                { id: 'overview', emoji: '👤', label: 'Character Sheet' },
-                { id: 'ratings', emoji: '📊', label: 'Profile Ratings' },
+                { id: 'overview', emoji: '🤡', label: 'Roast Sheet' },
+                { id: 'ratings', emoji: '📉', label: 'Reality Check' },
                 { id: 'readme', emoji: '📝', label: 'README Generator' },
                 { id: 'repo-analyzer', emoji: '🔍', label: 'Repo Analyzer' },
               ].map((tab) => (
@@ -290,8 +290,8 @@ function App() {
             {/* Mobile hamburger row */}
             <div className="mobile-tabs-row">
               <span className="mobile-active-tab-label">
-                {activeTab === 'overview' && '👤 Character Sheet'}
-                {activeTab === 'ratings' && '📊 Profile Ratings'}
+                {activeTab === 'overview' && '🤡 Roast Sheet'}
+                {activeTab === 'ratings' && '📉 Reality Check'}
                 {activeTab === 'readme' && '📝 README Generator'}
                 {activeTab === 'repo-analyzer' && '🔍 Repo Analyzer'}
               </span>
@@ -310,8 +310,8 @@ function App() {
             {mobileMenuOpen && (
               <div className="mobile-tab-dropdown">
                 {[
-                  { id: 'overview', emoji: '👤', label: 'Character Sheet' },
-                  { id: 'ratings', emoji: '📊', label: 'Profile Ratings' },
+                  { id: 'overview', emoji: '🤡', label: 'Roast Sheet' },
+                  { id: 'ratings', emoji: '📉', label: 'Reality Check' },
                   { id: 'readme', emoji: '📝', label: 'README Generator' },
                   { id: 'repo-analyzer', emoji: '🔍', label: 'Repo Analyzer' },
                 ].map((tab) => (
@@ -432,7 +432,7 @@ function App() {
                     <div className="bento-side">
                       <section className="card" style={{ padding: '24px', margin: 0, display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: 'var(--shadow-neon)' }}>
                         <div className="section-head" style={{ marginBottom: '4px' }}>
-                          <h3>Language Mastery &amp; Skills</h3>
+                          <h3>Languages You Pretend to Know</h3>
                         </div>
                         <div className="lang-distribution-bar" style={{ margin: 0, height: '12px', borderRadius: '6px' }}>
                           {profile.skillTree.filter(s => s.branch === 'Core Magic' || s.branch === 'Deep Systems').map((skill, idx) => {
@@ -464,8 +464,8 @@ function App() {
               {activeTab === 'ratings' && rating && (
                 <section className="card" id="rating-breakdown" style={{ padding: '24px' }}>
                   <div className="section-head">
-                    <h3>Profile Integrity Ratings &amp; Checklist</h3>
-                    <p className="subtle">Quantitative scores evaluating completeness, activity volumes, and repository social impact. Complete checklist items to hit 100%!</p>
+                    <h3>Reality Check &amp; Coping Mechanisms</h3>
+                    <p className="subtle">Quantitative scores evaluating how much of a fraud you are. Complete checklist items to hit 100% and feel slightly better about yourself!</p>
                   </div>
                   <div className="rating-breakdown-card">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'start' }}>

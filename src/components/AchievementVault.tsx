@@ -8,8 +8,8 @@ export function AchievementVault({ achievements }: AchievementVaultProps) {
   return (
     <article className="card" id="achievements">
       <div className="section-head">
-        <h3>Achievement Vault</h3>
-        <p className="subtle">Milestones unlocked through combat-tested contributions.</p>
+        <h3>Hall of Shame (Achievements)</h3>
+        <p className="subtle">Trophies you definitely didn't earn.</p>
       </div>
       <ul className="achievement-grid">
         {achievements.map((achievement, index) => (

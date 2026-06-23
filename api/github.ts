@@ -222,49 +222,49 @@ export default async function handler(req: any, res: any) {
     if (sortedLanguages.length > 0) {
       sortedLanguages.forEach(([lang, bytes]) => {
         const level = Math.max(15, Math.min(99, Math.floor((bytes / totalBytes) * 85) + 15));
-        let branch = 'Magical Arts';
+        let branch = 'Spaghetti Arts';
         if (['JavaScript', 'TypeScript', 'HTML', 'CSS', 'Svelte', 'Vue'].includes(lang)) {
-          branch = 'Core Magic';
+          branch = 'Browser Crashing';
         } else if (['Go', 'Rust', 'C++', 'C', 'Zig'].includes(lang)) {
-          branch = 'Deep Systems';
+          branch = 'Segfault Generation';
         } else if (['Python', 'R', 'Julia'].includes(lang)) {
-          branch = 'Rune Control';
+          branch = 'Indentation Errors';
         } else if (['Java', 'C#', 'Ruby', 'PHP'].includes(lang)) {
-          branch = 'Defense';
+          branch = 'Legacy Maintenance';
         }
         skills.push({ name: `${lang} Mastery`, level, branch });
       });
     } else {
       // Defaults if no languages found
-      skills.push({ name: 'JavaScript Mastery', level: 60, branch: 'Core Magic' });
-      skills.push({ name: 'HTML/CSS Crafting', level: 50, branch: 'Visual Arts' });
+      skills.push({ name: 'Copy-Pasting JS', level: 60, branch: 'Browser Crashing' });
+      skills.push({ name: 'Using !important', level: 99, branch: 'Legacy Maintenance' });
     }
 
     // Add generic developer lifecycle skills
-    skills.push({ name: 'Git & Command Line', level: Math.min(95, 30 + reposData.length * 3), branch: 'Rune Control' });
-    skills.push({ name: 'Testing Discipline', level: Math.min(85, 10 + totalPRs * 4), branch: 'Defense' });
-    skills.push({ name: 'CI/CD Automation', level: Math.min(90, 15 + Math.floor(totalCommits / 25)), branch: 'Machinery' });
+    skills.push({ name: 'Googling Error Messages', level: Math.min(99, 50 + reposData.length * 3), branch: 'Desperation' });
+    skills.push({ name: 'Testing in Production', level: Math.min(99, 30 + totalPRs * 4), branch: 'Recklessness' });
+    skills.push({ name: 'Breaking the Build', level: Math.min(99, 45 + Math.floor(totalCommits / 25)), branch: 'Chaos' });
 
     // 8. Classify character based on top language
-    let className = 'Fullstack Paladin';
-    let specialization = 'Generalist';
+    let className = 'StackOverflow Copy-Paster';
+    let specialization = 'Procrastination';
     if (sortedLanguages.length > 0) {
       const topLang = sortedLanguages[0][0];
       specialization = topLang;
       if (['TypeScript', 'JavaScript'].includes(topLang)) {
-        className = 'Frontend Mage';
+        className = 'Div Centering Expert';
       } else if (['Python'].includes(topLang)) {
-        className = 'AI Necromancer';
+        className = 'Prompt Engineer';
       } else if (['Go', 'Rust'].includes(topLang)) {
-        className = 'Systems Golem';
+        className = 'Rust Evangelist (Annoying)';
       } else if (['C++', 'C'].includes(topLang)) {
-        className = 'Engine Archmage';
+        className = 'Memory Leak Creator';
       } else if (['Java', 'C#'].includes(topLang)) {
-        className = 'Backend Knight';
+        className = 'Enterprise Boilerplater';
       } else if (['HTML', 'CSS'].includes(topLang)) {
-        className = 'Pixel Artisan';
+        className = 'Color Hex Memorizer';
       } else if (['Ruby', 'PHP'].includes(topLang)) {
-        className = 'Script Rogue';
+        className = 'Legacy Code Whisperer';
       }
     }
 
@@ -284,18 +284,18 @@ export default async function handler(req: any, res: any) {
 
     const powerLevel = Math.max(10, Math.min(100, Math.floor(completeness * 0.3 + activity * 0.4 + impact * 0.3)));
 
-    let rank = 'Bronze IV';
-    if (powerLevel > 85) rank = 'Challenger I';
-    else if (powerLevel > 70) rank = 'Diamond IV';
-    else if (powerLevel > 55) rank = 'Gold III';
-    else if (powerLevel > 35) rank = 'Silver II';
+    let rank = 'Keyboard Smasher';
+    if (powerLevel > 85) rank = "Basement Dweller (Mom's Favorite)";
+    else if (powerLevel > 70) rank = '10x Developer (Self-Proclaimed)';
+    else if (powerLevel > 55) rank = 'StackOverflow Dependent';
+    else if (powerLevel > 35) rank = 'Hello World Enthusiast';
 
     // 10. Generate dynamic stats array
     const stats: Stat[] = [
-      { label: 'Commits', value: totalCommits, modifier: `+${Math.floor(totalCommits / 52)} weekly avg` },
-      { label: 'Merged PRs', value: totalPRs, modifier: `Merged ${totalPRs} raids` },
-      { label: 'Stars Earned', value: totalStars, modifier: `Accumulated ${totalStars} favor` },
-      { label: 'Contrib Streak', value: `${streak} days`, modifier: streak > 10 ? 'Unstoppable!' : 'Streak active' },
+      { label: 'Commits', value: totalCommits, modifier: `Most are "fixed typo"` },
+      { label: 'Merged PRs', value: totalPRs, modifier: `Abandoned ${totalPRs * 3} others` },
+      { label: 'Stars Earned', value: totalStars, modifier: totalStars < 5 ? `Begged mom for them` : `Bought them on Fiverr` },
+      { label: 'Contrib Streak', value: `${streak} days`, modifier: streak > 10 ? 'Touch grass immediately.' : 'Too lazy for a streak.' },
     ];
 
     // 10.5. Scrape real achievements from user's GitHub profile page
@@ -343,43 +343,43 @@ export default async function handler(req: any, res: any) {
 
     // 11. Create achievements list
     const achievements: Achievement[] = [
-      { title: 'First Milestone', tier: 'Bronze', detail: 'Created a GitHub account' },
+      { title: 'Signed Up', tier: 'Bronze', detail: 'Finally figured out how to create an account' },
       ...scrapedAchievements
     ];
 
     if (totalCommits >= 1000 && !scrapedAchievements.some(a => a.title.includes('Commit Overlord'))) {
-      achievements.push({ title: 'Commit Overlord', tier: 'Gold', detail: 'Over 1000 repositories commits logged' });
+      achievements.push({ title: 'Script Kiddie', tier: 'Gold', detail: 'Probably using a script to fake these 1000+ commits' });
     } else if (totalCommits >= 100 && !scrapedAchievements.some(a => a.title.includes('Code Crusader'))) {
-      achievements.push({ title: 'Code Crusader', tier: 'Silver', detail: 'Cleared 100 commits' });
+      achievements.push({ title: 'Typo Fixer', tier: 'Silver', detail: 'Cleared 100 commits (mostly README typos)' });
     }
 
     if (totalPRs >= 20 && !scrapedAchievements.some(a => a.title.includes('Guild Champion'))) {
-      achievements.push({ title: 'Guild Champion', tier: 'Emerald', detail: '20+ pull requests merged' });
+      achievements.push({ title: 'Annoying Reviewer', tier: 'Emerald', detail: 'Spammed 20+ pull requests' });
     } else if (totalPRs >= 1 && !scrapedAchievements.some(a => a.title.includes('First Contribution'))) {
-      achievements.push({ title: 'First Contribution', tier: 'Bronze', detail: 'Merged first PR raid' });
+      achievements.push({ title: 'LGTM', tier: 'Bronze', detail: 'Merged first PR without testing' });
     }
 
     if (totalStars >= 50 && !scrapedAchievements.some(a => a.title.includes('Celebrity Sage'))) {
-      achievements.push({ title: 'Celebrity Sage', tier: 'Cyan', detail: 'Fame exceeds 50 stargazers' });
+      achievements.push({ title: 'Main Character Syndrome', tier: 'Cyan', detail: 'Fame exceeds 50 stargazers' });
     } else if (totalStars >= 5 && !scrapedAchievements.some(a => a.title.includes('Star Gatherer'))) {
-      achievements.push({ title: 'Star Gatherer', tier: 'Silver', detail: 'Earned 5+ repository stars' });
+      achievements.push({ title: 'Participation Trophy', tier: 'Silver', detail: 'Earned 5+ repository stars' });
     }
 
     if (userData.followers >= 50 && !scrapedAchievements.some(a => a.title.includes('Guild Leader'))) {
-      achievements.push({ title: 'Guild Leader', tier: 'Gold', detail: 'Commanding a following of 50+' });
+      achievements.push({ title: 'Cult Leader', tier: 'Gold', detail: 'Commanding a following of 50+ bots' });
     }
 
     if (streak >= 14 && !scrapedAchievements.some(a => a.title.includes('Flame Keeper'))) {
-      achievements.push({ title: 'Flame Keeper', tier: 'Cyan', detail: 'Maintained a 14+ day contribution streak' });
+      achievements.push({ title: 'No Social Life', tier: 'Cyan', detail: 'Maintained a 14+ day contribution streak' });
     }
 
     // 12. Create quests list from repositories
     const repositories: RepositoryQuest[] = reposData.slice(0, 5).map((repo: any, index: number) => {
-      let questType = 'Artifact Code';
-      if (repo.language === 'TypeScript' || repo.language === 'JavaScript') questType = 'UI Spellbook';
-      else if (repo.language === 'Python') questType = 'AI Artifact';
-      else if (repo.language === 'Go' || repo.language === 'Rust') questType = 'Engine Core';
-      else if (repo.language === 'CSS' || repo.language === 'HTML') questType = 'Visual Forge';
+      let questType = 'Spaghetti Code';
+      if (repo.language === 'TypeScript' || repo.language === 'JavaScript') questType = 'Button Centering Saga';
+      else if (repo.language === 'Python') questType = 'Jupyter Notebook Mess';
+      else if (repo.language === 'Go' || repo.language === 'Rust') questType = 'Unnecessary Rewrite';
+      else if (repo.language === 'CSS' || repo.language === 'HTML') questType = 'Z-Index Nightmare';
 
       let difficulty: 'Normal' | 'Hard' | 'Epic' = 'Normal';
       if (repo.stargazers_count > 50) difficulty = 'Epic';
@@ -400,21 +400,21 @@ export default async function handler(req: any, res: any) {
 
     // 13. Dynamic Analysis
     const strengths = [
-      `${specialization} Specialization`,
-      totalCommits > 150 ? 'High Code Output' : 'Consistent Contributions',
+      `${specialization} Obsession`,
+      totalCommits > 150 ? 'Quantity over Quality' : 'Barely Working',
     ];
-    if (totalStars > 10) strengths.push('Open Source Traction');
+    if (totalStars > 10) strengths.push('Good at Begging for Stars');
 
     const weaknesses = [];
-    if (totalPRs < 5) weaknesses.push('PR Participation');
-    if (totalStars < 2) weaknesses.push('Public Repository Stars');
-    if (totalCommits < 50) weaknesses.push('Low Commit Volume');
-    if (weaknesses.length === 0) weaknesses.push('Balanced stats');
+    if (totalPRs < 5) weaknesses.push('Afraid of Code Reviews');
+    if (totalStars < 2) weaknesses.push('Invisible to the World');
+    if (totalCommits < 50) weaknesses.push('Too Lazy to Commit');
+    if (weaknesses.length === 0) weaknesses.push("Thinks they are perfect (they aren't)");
 
     const missingSkills = [];
-    if (!skills.some(s => s.name.startsWith('TypeScript'))) missingSkills.push('TypeScript Precision');
-    if (totalPRs < 10) missingSkills.push('CI/CD Workflows');
-    if (missingSkills.length === 0) missingSkills.push('Database Tuning', 'System Scalability');
+    if (!skills.some(s => s.name.startsWith('TypeScript'))) missingSkills.push('Types? Never heard of em');
+    if (totalPRs < 10) missingSkills.push('Writing Clean Code');
+    if (missingSkills.length === 0) missingSkills.push('Social Skills', 'Leaving the House');
 
     const getInitials = (nameStr: string) => {
       const parts = nameStr.trim().split(/\s+/);
@@ -426,10 +426,10 @@ export default async function handler(req: any, res: any) {
 
     const profile: DeveloperProfile = {
       name: userData.name || login,
-      title: `Developer Tier: ${rank}`,
+      title: `Tier: ${rank}`,
       className,
       specialization,
-      guild: userData.company || 'Independent Mercenary',
+      guild: userData.company || 'Unemployed',
       avatarInitials: getInitials(userData.name || login),
       avatarUrl: userData.avatar_url,
       bio: userData.bio,
@@ -451,7 +451,7 @@ export default async function handler(req: any, res: any) {
         strengths,
         weaknesses,
         missingSkills,
-        nextQuest: totalPRs < 3 ? 'Initiate a collaborative pull request on a trending repository.' : 'Forge a test-driven CI/CD workflow for your primary quest.',
+        nextQuest: totalPRs < 3 ? 'Actually try contributing instead of hoarding repos.' : 'Write a test that actually tests something.',
       },
     };
 

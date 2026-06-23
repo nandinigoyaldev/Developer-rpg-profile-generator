@@ -17,9 +17,9 @@ export function QuestBoard({ repositories }: QuestBoardProps) {
     <article className="card" id="quests" style={{ padding: '24px' }}>
       <div className="section-head" style={{ marginBottom: '20px' }}>
         <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>📌</span> Pinned Repositories (Quests)
+          <span>🗑️</span> Repo Graveyard (Abandoned Projects)
         </h3>
-        <p className="subtle">Repositories mapped as active developer quests and code challenges.</p>
+        <p className="subtle">Repositories you started, abandoned, and left to rot.</p>
       </div>
 
       <div className="quest-grid-pinned">
@@ -41,7 +41,7 @@ export function QuestBoard({ repositories }: QuestBoardProps) {
                 </div>
 
                 <p className="quest-pinned-desc" style={{ marginTop: '8px' }}>
-                  {repo.questType} quest. Solve this issue path by contributing code, clearing merge reviews, and unlocking rewards.
+                  {repo.questType}. Probably just a tutorial you cloned and never finished.
                 </p>
               </div>
 
@@ -61,7 +61,7 @@ export function QuestBoard({ repositories }: QuestBoardProps) {
 
                 <div>
                   <span className={`quest-status-badge ${repo.status.toLowerCase()}`}>
-                    {repo.status === 'Active' ? '⚔️ Active' : repo.status === 'Locked' ? '🔒 Locked' : '🔓 Unlocked'}
+                    {repo.status === 'Active' ? '🗑️ Trashed' : repo.status === 'Locked' ? '🔒 Abandoned' : '🥱 Forgotten'}
                   </span>
                 </div>
 

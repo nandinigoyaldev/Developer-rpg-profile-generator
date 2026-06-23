@@ -32,63 +32,63 @@ export default async function handler(req: any, res: any) {
         name: 'Profile Avatar / Photo', 
         checked: !!profile.avatarInitials && profile.avatarInitials.length > 0, 
         weight: 10, 
-        tip: 'Set a profile picture or avatar image to personalize your developer presence.' 
+        tip: 'Upload a picture so we can see who wrote this terrible code.' 
       },
       { 
         id: 'name', 
         name: 'Profile Display Name', 
         checked: !!profile.name && profile.name !== 'Adventurer Coder' && profile.name.trim() !== '', 
         weight: 10, 
-        tip: 'Add your full display name so collaborators can recognize your real-world identity.' 
+        tip: 'Add your real name unless you are too ashamed of your commit history.' 
       },
       { 
         id: 'username', 
         name: 'Verified GitHub Username', 
         checked: !!profile.battleTag && !profile.battleTag.startsWith('Adventurer#'), 
         weight: 15, 
-        tip: 'Authenticate with a custom GitHub username rather than browsing in sandbox mode.' 
+        tip: 'Stop hiding in the sandbox and put in a real GitHub username.' 
       },
       { 
         id: 'guild', 
         name: 'Guild Affiliation (Company)', 
         checked: !!profile.guild && profile.guild !== 'Independent Mercenary' && profile.guild.trim() !== '', 
         weight: 10, 
-        tip: 'List a company or organization in your GitHub settings to show off your guild.' 
+        tip: 'List a company, or are you still "looking for new opportunities"?' 
       },
       { 
         id: 'skills', 
         name: 'Technical Skills Registry (>3)', 
         checked: !!(profile.skillTree && profile.skillTree.length >= 3), 
         weight: 15, 
-        tip: 'Build a comprehensive skill tree by listing languages or parsing your technical resume.' 
+        tip: 'You need at least 3 skills to pretend you are a full-stack developer.' 
       },
       { 
         id: 'repos', 
         name: 'Quest Log (Public Repos)', 
         checked: !!(profile.repositories && profile.repositories.length > 0), 
         weight: 10, 
-        tip: 'Publish public repositories to build up your code quest logs.' 
+        tip: 'Make a repo public! It\'s okay, nobody is going to steal your spaghetti code.' 
       },
       { 
         id: 'achievements', 
         name: 'Achievements & Milestones (>1)', 
         checked: !!(profile.achievements && profile.achievements.length > 1), 
         weight: 10, 
-        tip: 'Unlock achievements by committing code, merging pull request raids, and collecting stargazers.' 
+        tip: 'Unlock achievements. It\'s easier than actually fixing your bugs.' 
       },
       { 
         id: 'commits', 
         name: 'Activity Records (>50 Commits)', 
         checked: commitsVal >= 50, 
         weight: 10, 
-        tip: 'Push code regularly to establish a solid commit record.' 
+        tip: 'Push more code. Empty commit messages don\'t count, but we\'ll pretend they do.' 
       },
       { 
         id: 'stars', 
         name: 'Social Impact (Stars > 0)', 
         checked: starsVal > 0, 
         weight: 10, 
-        tip: 'Gather stargazer stars on your repositories to make an impact in the open-source grid.' 
+        tip: 'Beg your mom to star your repository so you have at least 1.' 
       }
     ];
 
@@ -111,11 +111,11 @@ export default async function handler(req: any, res: any) {
 
     // 4. Power level and Rank
     const powerLevel = Math.max(10, Math.min(100, Math.floor(completeness * 0.3 + consistency * 0.4 + impact * 0.3)));
-    let rank = 'Bronze IV';
-    if (powerLevel > 85) rank = 'Challenger I';
-    else if (powerLevel > 70) rank = 'Diamond IV';
-    else if (powerLevel > 55) rank = 'Gold III';
-    else if (powerLevel > 35) rank = 'Silver II';
+    let rank = 'Keyboard Smasher';
+    if (powerLevel > 85) rank = "Basement Dweller (Mom's Favorite)";
+    else if (powerLevel > 70) rank = '10x Developer (Self-Proclaimed)';
+    else if (powerLevel > 55) rank = 'StackOverflow Dependent';
+    else if (powerLevel > 35) rank = 'Hello World Enthusiast';
 
     // 5. Generate highly personalized tips based on actual data
     const personalTips: string[] = [];
@@ -126,41 +126,41 @@ export default async function handler(req: any, res: any) {
         ['test', 'hello', 'hello-world', 'demo', 'sandbox', 'practice', 'analysis'].some(w => r.name.toLowerCase().includes(w))
       );
       if (genericRepos.length > 0) {
-        personalTips.push(`Your repository name '${genericRepos[0].name}' is somewhat generic. Try naming projects descriptively to showcase distinct coding quests.`);
+        personalTips.push(`Your repository name '${genericRepos[0].name}' is incredibly uninspired. Nobody wants to look at a 'hello-world' project from 2 years ago.`);
       }
 
       // Stars check
       const unstarredRepos = profile.repositories.filter(r => r.stars === 0);
       if (unstarredRepos.length > 0) {
-        personalTips.push(`Your repository '${unstarredRepos[0].name}' has zero stars. Polish its README, add screenshots, and share it with peers to gather stargazer favor!`);
+        personalTips.push(`Your repository '${unstarredRepos[0].name}' has 0 stars. Did you even try to spam it on LinkedIn?`);
       }
     }
 
     // Guild Check
-    if (profile.guild === 'Independent Mercenary') {
-      personalTips.push("You are listed as an 'Independent Mercenary'. Update the 'Company' field in your GitHub profile to affiliate with a specific organization and boost your team rating.");
+    if (profile.guild === 'Independent Mercenary' || profile.guild === 'Unemployed') {
+      personalTips.push("You are listed as 'Unemployed'. Maybe spend less time tweaking your VS Code theme and more time sending out resumes.");
     }
 
     // Skill Tree branch checks
     if (profile.skillTree) {
-      const hasSystems = profile.skillTree.some(s => s.branch === 'Deep Systems');
-      const hasFrontend = profile.skillTree.some(s => s.branch === 'Core Magic');
+      const hasSystems = profile.skillTree.some(s => s.branch === 'Segfault Generation');
+      const hasFrontend = profile.skillTree.some(s => s.branch === 'Browser Crashing');
       
       if (!hasSystems && hasFrontend) {
-        personalTips.push("Your spellbook is front-end heavy. Try learning low-level magic like Go, Rust, or C++ to unlock Systems engineering quests.");
+        personalTips.push("You only know frontend? Try learning a real systems language so you can write memory leaks instead of just infinite loops.");
       } else if (hasSystems && !hasFrontend) {
-        personalTips.push("Your spellbook focuses on backend runic math. Pick up TypeScript/React UI skills so you can forge responsive mirrors for your command pipelines.");
+        personalTips.push("You write backend code but your CSS is trash. Learn how to center a div before you start rewriting everything in Rust.");
       }
     }
 
     // PR checks
     if (prsVal < 3) {
-      personalTips.push(`With only ${prsVal} merged PRs, your collaboration record is raw. Contribute bug fixes or open-source additions to other guilds to unlock new trophies.`);
+      personalTips.push(`Only ${prsVal} merged PRs? I guess you're too scared of code reviews to contribute to anyone else's codebase.`);
     }
 
     // Fallbacks
     if (personalTips.length === 0) {
-      personalTips.push("Exceptional stats! Keep clearing high-difficulty quests and mentoring other adventurers to maintain your Challenger standing.");
+      personalTips.push("Honestly, we couldn't find much to roast. You're probably using a secondary account or just really boring.");
     }
 
     res.setHeader('Content-Type', 'application/json');

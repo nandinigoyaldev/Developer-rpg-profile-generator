@@ -8,8 +8,8 @@ export function StatPanel({ stats }: StatPanelProps) {
   return (
     <article className="card" id="stats">
       <div className="section-head">
-        <h3>Combat Stats</h3>
-        <p className="subtle">Real contribution metrics from your profile history.</p>
+        <h3>Pathetic Stats</h3>
+        <p className="subtle">We scraped this, unfortunately it's real.</p>
       </div>
       <div className="stat-grid">
         {stats.map((stat) => (
