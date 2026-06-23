@@ -4,12 +4,14 @@ import { PinnedTrash } from './components/PinnedTrash';
 import { ToxicTraits } from './components/ToxicTraits';
 import { ContributionGraph } from './components/ContributionGraph';
 import { ReadmePanel } from './components/ReadmePanel';
+import { RepoAnalyzerPanel } from './components/RepoAnalyzerPanel';
+import { ProfileJudgePanel } from './components/ProfileJudgePanel';
 import { characterProfile } from './data/character';
 import type { DeveloperProfile } from './types/profile';
 
 function App() {
   const [profile, setProfile] = useState<DeveloperProfile | any>(characterProfile);
-  const [activeTab, setActiveTab] = useState<'overview' | 'readme'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'readme' | 'repo' | 'judge'>('overview');
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,9 +29,19 @@ function App() {
     setLoading(true);
     setErrorMessage('');
 
+    let sanitizedUsername = usernameInput.trim();
+    // Extract username if user pasted a full GitHub URL
+    if (sanitizedUsername.includes('github.com/')) {
+      sanitizedUsername = sanitizedUsername.split('github.com/')[1].split('/')[0];
+    }
+    // Remove @ if they typed @username
+    if (sanitizedUsername.startsWith('@')) {
+      sanitizedUsername = sanitizedUsername.slice(1);
+    }
+
     try {
       const response = await fetch(
-        `/api/github?username=${encodeURIComponent(usernameInput.trim())}`,
+        `/api/github?username=${encodeURIComponent(sanitizedUsername)}`,
       );
       if (!response.ok) {
         const err = await response.json();
@@ -42,7 +54,21 @@ function App() {
       setActiveTab('overview');
     } catch (err: any) {
       console.error(err);
-      setErrorMessage(err.message || 'Error compiling profile data.');
+      
+      const msg = err.message || '';
+      if (msg.includes('404') || msg.includes('Not Found')) {
+        const roasts = [
+          "404: Skill not found. Did you type that right?",
+          "This user doesn't exist. Much like your unit tests.",
+          "Are you sure they are a developer? GitHub has never heard of them.",
+          "User not found. Maybe they got fired and deleted their account.",
+          "404. Let's pretend that was a typo and not you hallucinating a friend."
+        ];
+        const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
+        setErrorMessage(randomRoast);
+      } else {
+        setErrorMessage(msg || 'Error compiling profile data.');
+      }
     } finally {
       setLoading(false);
     }
@@ -169,7 +195,7 @@ function App() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 
                 {/* Tab Navigation */}
-                <div style={{ borderBottom: '1px solid var(--line-strong)', marginBottom: '24px', display: 'flex', gap: '16px' }}>
+                <div style={{ borderBottom: '1px solid var(--line-strong)', marginBottom: '24px', display: 'flex', gap: '16px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
                   <button
                     style={{ background: 'none', border: 'none', padding: '8px 16px', color: activeTab === 'overview' ? 'var(--text-main)' : 'var(--text-muted)', borderBottom: activeTab === 'overview' ? '2px solid var(--git-orange)' : '2px solid transparent', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
                     onClick={() => setActiveTab('overview')}
@@ -181,6 +207,18 @@ function App() {
                     onClick={() => setActiveTab('readme')}
                   >
                     README Generator
+                  </button>
+                  <button
+                    style={{ background: 'none', border: 'none', padding: '8px 16px', color: activeTab === 'repo' ? 'var(--text-main)' : 'var(--text-muted)', borderBottom: activeTab === 'repo' ? '2px solid var(--git-orange)' : '2px solid transparent', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
+                    onClick={() => setActiveTab('repo')}
+                  >
+                    Repo Analyzer
+                  </button>
+                  <button
+                    style={{ background: 'none', border: 'none', padding: '8px 16px', color: activeTab === 'judge' ? 'var(--text-main)' : 'var(--text-muted)', borderBottom: activeTab === 'judge' ? '2px solid var(--git-orange)' : '2px solid transparent', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
+                    onClick={() => setActiveTab('judge')}
+                  >
+                    Profile Judge
                   </button>
                 </div>
 
@@ -196,6 +234,16 @@ function App() {
                 {/* TAB 2: README GENERATOR */}
                 {activeTab === 'readme' && (
                   <ReadmePanel profile={profile} />
+                )}
+
+                {/* TAB 3: REPO ANALYZER */}
+                {activeTab === 'repo' && (
+                  <RepoAnalyzerPanel />
+                )}
+
+                {/* TAB 4: PROFILE JUDGE */}
+                {activeTab === 'judge' && (
+                  <ProfileJudgePanel profile={profile} />
                 )}
 
               </div>

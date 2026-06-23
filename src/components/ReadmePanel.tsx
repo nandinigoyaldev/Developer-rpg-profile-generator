@@ -1,5 +1,7 @@
 /* eslint-disable */
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import type { DeveloperProfile } from '../types/profile';
 
 type ReadmePanelProps = {
@@ -7,104 +9,7 @@ type ReadmePanelProps = {
 };
 
 // Client-side simple Markdown to HTML parser for high-fidelity visual preview
-function renderMarkdownToHtml(markdown: string) {
-  if (!markdown) return '<p>No content generated yet.</p>';
-  
-  let html = markdown;
-  
-  // Escape HTML entities to prevent rendering breaking or XSS
-  html = html
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  
-  // Headers
-  html = html.replace(/^# (.*$)/gim, '<h1 style="border-bottom: 1px solid var(--line-strong); padding-bottom: 6px; margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25;">$1</h1>');
-  html = html.replace(/^## (.*$)/gim, '<h2 style="border-bottom: 1px solid var(--line-strong); padding-bottom: 6px; margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25;">$1</h2>');
-  html = html.replace(/^### (.*$)/gim, '<h3 style="margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; font-size: 1.25rem;">$1</h3>');
-  html = html.replace(/^#### (.*$)/gim, '<h4 style="margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; font-size: 1rem;">$1</h4>');
-  
-  // Bold & Italics
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
-  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
-  
-  // Inline Code blocks
-  html = html.replace(/`(.*?)`/g, '<code style="background-color: rgba(110, 118, 129, 0.2); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; font-size: 85%;">$1</code>');
-  
-  // Badges & Images — max-width: 100% so they never overflow
-  html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; max-height: 28px; border-radius: 4px; margin: 4px 4px 4px 0; display: inline-block; vertical-align: middle;" />');
-  
-  // Links
-  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--git-blue); text-decoration: none;">$1</a>');
-  
-  // Table Renderer Heuristics
-  const lines = html.split('\n');
-  let inTable = false;
-  let tableHtml = '';
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line.startsWith('|') && line.endsWith('|')) {
-      if (!inTable) {
-        inTable = true;
-        // Wrap table in a scrollable div so it never blows out on mobile
-        tableHtml = '<div style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; max-width: 100%;"><table style="width: 100%; min-width: 300px; border-collapse: collapse; font-size: 0.85rem; text-align: left; border: 1px solid var(--line-strong);">';
-      }
-      
-      const cells = line.split('|').slice(1, -1).map(c => c.trim());
-      // Check if separator line (e.g. | :--- | :--- |)
-      if (cells.every(c => /^:?-+:?$/.test(c))) {
-        continue;
-      }
-      
-      const isHeaderRow = !tableHtml.includes('</th>');
-      tableHtml += `<tr style="border-bottom: 1px solid var(--line-strong); background-color: ${isHeaderRow ? 'var(--bg-deep)' : 'transparent'};">`;      
-      cells.forEach((cell) => {
-        const tag = isHeaderRow ? 'th' : 'td';
-        tableHtml += `<${tag} style="padding: 6px 10px; border: 1px solid var(--line-strong); font-weight: ${isHeaderRow ? '600' : 'normal'}; white-space: nowrap;">${cell}</${tag}>`;
-      });
-      
-      tableHtml += '</tr>';
-      lines[i] = ''; // clear current line representation
-    } else {
-      if (inTable) {
-        inTable = false;
-        tableHtml += '</table></div>'; // close both table and wrapper div
-        // Put completed table block in the previous blank slot
-        lines[i - 1] = tableHtml;
-        tableHtml = '';
-      }
-    }
-  }
-  
-  html = lines.filter(l => l !== '').join('\n');
-  
-  // Horizontal Dividers
-  html = html.replace(/^---$/gim, '<hr style="border: 0; height: 1px; background-color: var(--line-strong); margin: 24px 0;" />');
-  
-  // Blockquotes
-  html = html.replace(/^\>&nbsp;(.*$)/gim, '<blockquote style="border-left: 4px solid var(--line-strong); padding-left: 16px; margin: 16px 0; color: var(--text-muted);">$1</blockquote>');
-  html = html.replace(/^\> (.*$)/gim, '<blockquote style="border-left: 4px solid var(--line-strong); padding-left: 16px; margin: 16px 0; color: var(--text-muted);">$1</blockquote>');
-  
-  // Bullet lists
-  html = html.replace(/^\- (.*$)/gim, '<li style="margin-left: 24px; list-style-type: disc; margin-bottom: 4px;">$1</li>');
-  
-  // Paragraph block enclosures
-  const paragraphs = html.split('\n\n');
-  html = paragraphs.map(p => {
-    const trimmed = p.trim();
-    if (!trimmed) return '';
-    // If it starts with HTML elements, don't wrap in <p>
-    if (/^<(h1|h2|h3|h4|table|div|hr|blockquote|li|ul|ol|img)/i.test(trimmed)) {
-      return trimmed;
-    }
-    return `<p style="margin: 8px 0; line-height: 1.6; word-break: break-word; overflow-wrap: break-word;">${trimmed}</p>`;
-  }).join('\n');
-  
-  return html;
-}
+
 
 export function ReadmePanel({ profile }: ReadmePanelProps) {
   const [customStyle, setCustomStyle] = useState('cute + black theme');
@@ -162,9 +67,6 @@ export function ReadmePanel({ profile }: ReadmePanelProps) {
     element.click();
     document.body.removeChild(element);
   };
-
-  // Compile visual preview
-  const renderedPreviewHtml = renderMarkdownToHtml(readmeContent);
 
   return (
     <article className="readme-panel-card" id="readme-generator">
@@ -254,10 +156,11 @@ export function ReadmePanel({ profile }: ReadmePanelProps) {
       ) : (
         <>
           {activeTab === 'preview' ? (
-            <div
-              className="readme-preview-box readme-preview-rendered"
-              dangerouslySetInnerHTML={{ __html: renderedPreviewHtml }}
-            />
+            <div className="readme-preview-box readme-preview-rendered markdown-body">
+              <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                {readmeContent || 'No content generated yet.'}
+              </ReactMarkdown>
+            </div>
           ) : (
             <textarea
               className="readme-preview-box readme-preview-code"
